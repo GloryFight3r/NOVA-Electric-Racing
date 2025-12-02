@@ -44,7 +44,9 @@ void MX_CAN1_Init(void);
 
 void CAN_Init_Interrupts(void);
 
-void CAN_Send_Message();
+void CAN_Send_Message(void);
+
+void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *);
 
 /* USER CODE END Prototypes */
 
@@ -53,4 +55,3 @@ void CAN_Send_Message();
 #endif
 
 #endif /* __CAN_H__ */
-
