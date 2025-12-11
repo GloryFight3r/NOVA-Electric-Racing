@@ -21,7 +21,9 @@
 #include "can.h"
 #include "eth.h"
 #include "gpio.h"
-#include "stdio.h"
+#include "stm32f767xx.h"
+#include "stm32f7xx_hal_gpio.h"
+#include "tim.h"
 #include "usart.h"
 #include "usb_otg.h"
 
@@ -99,7 +101,7 @@ int main(void) {
   MX_USART3_UART_Init();
   MX_USB_OTG_FS_PCD_Init();
   MX_CAN1_Init();
-  CAN_Init_Interrupts();
+  MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
@@ -107,8 +109,8 @@ int main(void) {
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1) {
-
     /* USER CODE END WHILE */
+
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
@@ -135,7 +137,7 @@ void SystemClock_Config(void) {
    * in the RCC_OscInitTypeDef structure.
    */
   RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
-  RCC_OscInitStruct.HSEState = RCC_HSE_BYPASS;
+  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
   RCC_OscInitStruct.PLL.PLLM = 4;

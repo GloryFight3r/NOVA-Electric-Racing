@@ -55,3 +55,4 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *);
 #endif
 
 #endif /* __CAN_H__ */
+

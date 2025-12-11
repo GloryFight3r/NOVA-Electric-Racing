@@ -19,8 +19,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "can.h"
-#include "stdio.h"
-#include "stm32f7xx_hal_can.h"
+#include "inverter_broadcast.h"
 
 /* USER CODE BEGIN 0 */
 
@@ -162,6 +161,7 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan1) {
     for (int i = 0; i < 8; i++) {
       printf("%d ", buffTx[i]);
     }
+
     printf("\n\r");
     // TODO
   }

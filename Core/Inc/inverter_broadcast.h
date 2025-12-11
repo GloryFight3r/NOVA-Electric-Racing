@@ -9,6 +9,8 @@ extern "C" {
 
 /* Includes ------------------------------------------------------------------*/
 
+void Parse_Internal_States(uint8_t *);
+
 enum VSM_STATE {
   VSM_START_STATE,
   VSM_PRE_CHARGE_INIT_STATE,
