@@ -44,6 +44,8 @@ Core/Src/usart.c \
 Core/Src/usb_otg.c \
 Core/Src/stm32f7xx_it.c \
 Core/Src/stm32f7xx_hal_msp.c \
+Core/Src/inverter_broadcast.c \
+Core/Src/inverter_command.c \
 Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_can.c \
 Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_rcc.c \
 Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_rcc_ex.c \

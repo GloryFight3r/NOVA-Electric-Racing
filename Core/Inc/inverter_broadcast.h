@@ -20,21 +20,21 @@ struct Motor_Position_Information {
    *
    * Format: Angle.
    */
-  uint16_t motor_angle;
+  int16_t motor_angle;
 
   /*
    * The measured speed of the motor.
    *
    * Format: Angular Velocity.
    */
-  uint16_t motor_speed;
+  int16_t motor_speed;
 
   /*
    * The actual electrical frequency of the ivnerter.
    *
    * Format: Frequency
    */
-  uint16_t electrical_output_freq;
+  int16_t electrical_output_freq;
 
   /*
    * This is used in calibration of resolver angle adjustment.
@@ -43,7 +43,7 @@ struct Motor_Position_Information {
    * For example 270 degrees is equal to -90 degrees, and
    * 190 degrees is equal to -170 degrees.
    */
-  uint16_t delta_resolver_filtered;
+  int16_t delta_resolver_filtered;
 };
 
 /*

@@ -29,6 +29,8 @@
 #include "usart.h"
 #include "usb_otg.h"
 
+#define RESOLVER_CALIBRATION
+
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
@@ -108,57 +110,21 @@ int main(void) {
 
   /* USER CODE END 2 */
 
-  // Code for the pre-charge relay
-  TIM1->CCR1 = 65535;
-  /* Infinite loop */
+  // Set the duty cycle of the pre-charge relay
+  // TIM1->CCR1 = 65535;
+
   /* USER CODE BEGIN WHILE */
+  // pre-charge the inverter
 
-  /*
-   *   LSB
-   * 0 0 both relays are off
-   * 0 1 pre-charge relay is on
-   * 1 0 main contactor is on
-   * 1 1 invalid
-   */
-  uint8_t relay_states = 0;
+#ifdef RESOLVER_CALIBRATION
 
+#else
   while (1) {
-    /* USER CODE END WHILE */
-
-    switch (relay_states) {
-    case 0:
-      HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_1);
-
-      HAL_GPIO_WritePin(GPIOF, GPIO_PIN_13, GPIO_PIN_RESET);
-
-      HAL_Delay(5000);
-      relay_states = 1;
-      break;
-    case 1:
-      HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
-
-      HAL_GPIO_WritePin(GPIOF, GPIO_PIN_13, GPIO_PIN_RESET);
-
-      HAL_Delay(5000);
-      relay_states = 2;
-      break;
-    case 2:
-      HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_1);
-
-      HAL_GPIO_WritePin(GPIOF, GPIO_PIN_13, GPIO_PIN_SET);
-
-      HAL_Delay(5000);
-      relay_states = 0;
-      break;
-    default:
-      relay_states = 0;
-      break;
-      // printf("INVALID RELAY STATE");
-    }
-
     /* USER CODE BEGIN 3 */
+
+    /* USER CODE END 3 */
   }
-  /* USER CODE END 3 */
+#endif
 }
 
 /**

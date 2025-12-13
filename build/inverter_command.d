@@ -1,4 +1,5 @@
-build/can.o: Core/Src/can.c Core/Inc/can.h Core/Inc/main.h \
+build/inverter_command.o: Core/Src/inverter_command.c \
+ Core/Inc/inverter_command.h Core/Inc/can.h Core/Inc/main.h \
  Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal.h \
  Core/Inc/stm32f7xx_hal_conf.h \
  Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_rcc.h \
@@ -31,8 +32,8 @@ build/can.o: Core/Src/can.c Core/Inc/can.h Core/Inc/main.h \
  Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_uart_ex.h \
  Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_pcd.h \
  Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_ll_usb.h \
- Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_pcd_ex.h \
- Core/Inc/inverter_broadcast.h Core/Inc/inverter_command.h
+ Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_pcd_ex.h
+Core/Inc/inverter_command.h:
 Core/Inc/can.h:
 Core/Inc/main.h:
 Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal.h:
@@ -70,5 +71,3 @@ Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_uart_ex.h:
 Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_pcd.h:
 Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_ll_usb.h:
 Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_pcd_ex.h:
-Core/Inc/inverter_broadcast.h:
-Core/Inc/inverter_command.h:

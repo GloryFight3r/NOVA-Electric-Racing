@@ -152,12 +152,11 @@ size_t Check_Fault_Codes(struct Fault_Codes fault_codes,
 struct Motor_Position_Information
 Parse_Motor_Position_Information(uint8_t *arr) {
 
-  uint16_t motor_angle = ((uint16_t)arr[0]) | (((uint16_t)arr[1]) << 8);
-  uint16_t motor_speed = ((uint16_t)arr[2]) | (((uint16_t)arr[3]) << 8);
-  uint16_t electrical_output_freq =
-      ((uint16_t)arr[4]) | (((uint16_t)arr[5]) << 8);
-  uint16_t delta_resolver_filtered =
-      ((uint16_t)arr[6]) | (((uint16_t)arr[7]) << 8);
+  int16_t motor_angle = ((int16_t)arr[0]) | (((int16_t)arr[1]) << 8);
+  int16_t motor_speed = ((int16_t)arr[2]) | (((int16_t)arr[3]) << 8);
+  int16_t electrical_output_freq = ((int16_t)arr[4]) | (((int16_t)arr[5]) << 8);
+  int16_t delta_resolver_filtered =
+      ((int16_t)arr[6]) | (((int16_t)arr[7]) << 8);
 
   struct Motor_Position_Information motor_position_information = {
       motor_angle,
@@ -170,10 +169,10 @@ Parse_Motor_Position_Information(uint8_t *arr) {
 }
 
 struct Voltage_Information Parse_Voltage_Information(uint8_t *arr) {
-  uint16_t dc_buc_voltage = ((uint16_t)arr[0]) | (((uint16_t)arr[1]) << 8);
-  uint16_t output_voltage = ((uint16_t)arr[2]) | (((uint16_t)arr[3]) << 8);
-  uint16_t vab_vd_voltage = ((uint16_t)arr[4]) | (((uint16_t)arr[5]) << 8);
-  uint16_t vbc_vq_voltage = ((uint16_t)arr[6]) | (((uint16_t)arr[7]) << 8);
+  int16_t dc_buc_voltage = ((int16_t)arr[0]) | (((int16_t)arr[1]) << 8);
+  int16_t output_voltage = ((int16_t)arr[2]) | (((int16_t)arr[3]) << 8);
+  int16_t vab_vd_voltage = ((int16_t)arr[4]) | (((int16_t)arr[5]) << 8);
+  int16_t vbc_vq_voltage = ((int16_t)arr[6]) | (((int16_t)arr[7]) << 8);
 
   struct Voltage_Information voltage_information = {
       dc_buc_voltage,

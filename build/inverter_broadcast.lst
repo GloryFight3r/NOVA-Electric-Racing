@@ -1,0 +1,1008 @@
+ARM GAS  /tmp/ccol55mR.s 			page 1
+
+
+   1              		.cpu cortex-m7
+   2              		.arch armv7e-m
+   3              		.fpu fpv5-d16
+   4              		.eabi_attribute 28, 1
+   5              		.eabi_attribute 20, 1
+   6              		.eabi_attribute 21, 1
+   7              		.eabi_attribute 23, 3
+   8              		.eabi_attribute 24, 1
+   9              		.eabi_attribute 25, 1
+  10              		.eabi_attribute 26, 1
+  11              		.eabi_attribute 30, 1
+  12              		.eabi_attribute 34, 1
+  13              		.eabi_attribute 18, 4
+  14              		.file	"inverter_broadcast.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.file 1 "Core/Src/inverter_broadcast.c"
+  19              		.section	.text.Parse_Internal_States,"ax",%progbits
+  20              		.align	1
+  21              		.global	Parse_Internal_States
+  22              		.syntax unified
+  23              		.thumb
+  24              		.thumb_func
+  26              	Parse_Internal_States:
+  27              	.LVL0:
+  28              	.LFB0:
+   1:Core/Src/inverter_broadcast.c **** #include "inverter_broadcast.h"
+   2:Core/Src/inverter_broadcast.c **** #include <stdbool.h>
+   3:Core/Src/inverter_broadcast.c **** #include <stddef.h>
+   4:Core/Src/inverter_broadcast.c **** 
+   5:Core/Src/inverter_broadcast.c **** struct Internal_States Parse_Internal_States(uint8_t *arr) {
+  29              		.loc 1 5 60 view -0
+  30              		.cfi_startproc
+  31              		@ args = 0, pretend = 0, frame = 56
+  32              		@ frame_needed = 0, uses_anonymous_args = 0
+  33              		.loc 1 5 60 is_stmt 0 view .LVU1
+  34 0000 2DE9F04F 		push	{r4, r5, r6, r7, r8, r9, r10, fp, lr}
+  35              	.LCFI0:
+  36              		.cfi_def_cfa_offset 36
+  37              		.cfi_offset 4, -36
+  38              		.cfi_offset 5, -32
+  39              		.cfi_offset 6, -28
+  40              		.cfi_offset 7, -24
+  41              		.cfi_offset 8, -20
+  42              		.cfi_offset 9, -16
+  43              		.cfi_offset 10, -12
+  44              		.cfi_offset 11, -8
+  45              		.cfi_offset 14, -4
+  46 0004 8FB0     		sub	sp, sp, #60
+  47              	.LCFI1:
+  48              		.cfi_def_cfa_offset 96
+  49 0006 8446     		mov	ip, r0
+   6:Core/Src/inverter_broadcast.c ****   enum VSM_STATE vsm_state = arr[0];
+  50              		.loc 1 6 3 is_stmt 1 view .LVU2
+  51              		.loc 1 6 18 is_stmt 0 view .LVU3
+  52 0008 0A78     		ldrb	r2, [r1]	@ zero_extendqisi2
+ARM GAS  /tmp/ccol55mR.s 			page 2
+
+
+  53              	.LVL1:
+   7:Core/Src/inverter_broadcast.c **** 
+   8:Core/Src/inverter_broadcast.c ****   if (arr[0] == 14) {
+  54              		.loc 1 8 3 is_stmt 1 view .LVU4
+  55 000a 0E2A     		cmp	r2, #14
+  56 000c 17D0     		beq	.L11
+  57 000e 12D8     		bhi	.L3
+  58 0010 072A     		cmp	r2, #7
+  59 0012 0ED8     		bhi	.L15
+  60              	.LVL2:
+  61              	.L2:
+   9:Core/Src/inverter_broadcast.c ****     vsm_state = VSM_SHUTDOWN_IN_PROCESS;
+  10:Core/Src/inverter_broadcast.c ****   } else if (arr[0] == 15) {
+  11:Core/Src/inverter_broadcast.c ****     vsm_state = VSM_RECYCLE_POWER_STATE;
+  12:Core/Src/inverter_broadcast.c ****   } else if (arr[0] > 7) {
+  13:Core/Src/inverter_broadcast.c ****     vsm_state = VSM_UNKNOWN_STATE;
+  14:Core/Src/inverter_broadcast.c ****   }
+  15:Core/Src/inverter_broadcast.c **** 
+  16:Core/Src/inverter_broadcast.c ****   uint8_t pwm_frequency = arr[1];
+  62              		.loc 1 16 3 view .LVU5
+  63              		.loc 1 16 11 is_stmt 0 view .LVU6
+  64 0014 91F801B0 		ldrb	fp, [r1, #1]	@ zero_extendqisi2
+  65              	.LVL3:
+  17:Core/Src/inverter_broadcast.c **** 
+  18:Core/Src/inverter_broadcast.c ****   enum INV_STATE inv_state = arr[2];
+  66              		.loc 1 18 3 is_stmt 1 view .LVU7
+  19:Core/Src/inverter_broadcast.c **** 
+  20:Core/Src/inverter_broadcast.c ****   switch (arr[2]) {
+  67              		.loc 1 20 3 view .LVU8
+  68              		.loc 1 20 14 is_stmt 0 view .LVU9
+  69 0018 8878     		ldrb	r0, [r1, #2]	@ zero_extendqisi2
+  70              	.LVL4:
+  71              		.loc 1 20 3 view .LVU10
+  72 001a 0C28     		cmp	r0, #12
+  73 001c 00F28C80 		bhi	.L4
+  74 0020 DFE800F0 		tbb	[pc, r0]
+  75              	.L6:
+  76 0024 12       		.byte	(.L10-.L6)/2
+  77 0025 12       		.byte	(.L10-.L6)/2
+  78 0026 12       		.byte	(.L10-.L6)/2
+  79 0027 12       		.byte	(.L10-.L6)/2
+  80 0028 12       		.byte	(.L10-.L6)/2
+  81 0029 11       		.byte	(.L9-.L6)/2
+  82 002a 11       		.byte	(.L9-.L6)/2
+  83 002b 11       		.byte	(.L9-.L6)/2
+  84 002c 84       		.byte	(.L8-.L6)/2
+  85 002d 86       		.byte	(.L7-.L6)/2
+  86 002e 88       		.byte	(.L5-.L6)/2
+  87 002f 88       		.byte	(.L5-.L6)/2
+  88 0030 88       		.byte	(.L5-.L6)/2
+  89              	.LVL5:
+  90 0031 00       		.p2align 1
+  91              	.L15:
+   6:Core/Src/inverter_broadcast.c **** 
+  92              		.loc 1 6 18 view .LVU11
+  93 0032 0A22     		movs	r2, #10
+  94              	.LVL6:
+ARM GAS  /tmp/ccol55mR.s 			page 3
+
+
+   6:Core/Src/inverter_broadcast.c **** 
+  95              		.loc 1 6 18 view .LVU12
+  96 0034 EEE7     		b	.L2
+  97              	.LVL7:
+  98              	.L3:
+   6:Core/Src/inverter_broadcast.c **** 
+  99              		.loc 1 6 18 view .LVU13
+ 100 0036 0F2A     		cmp	r2, #15
+ 101 0038 03D1     		bne	.L12
+ 102 003a 0922     		movs	r2, #9
+ 103              	.LVL8:
+   6:Core/Src/inverter_broadcast.c **** 
+ 104              		.loc 1 6 18 view .LVU14
+ 105 003c EAE7     		b	.L2
+ 106              	.LVL9:
+ 107              	.L11:
+   6:Core/Src/inverter_broadcast.c **** 
+ 108              		.loc 1 6 18 view .LVU15
+ 109 003e 0822     		movs	r2, #8
+ 110              	.LVL10:
+   6:Core/Src/inverter_broadcast.c **** 
+ 111              		.loc 1 6 18 view .LVU16
+ 112 0040 E8E7     		b	.L2
+ 113              	.LVL11:
+ 114              	.L12:
+   6:Core/Src/inverter_broadcast.c **** 
+ 115              		.loc 1 6 18 view .LVU17
+ 116 0042 0A22     		movs	r2, #10
+ 117              	.LVL12:
+   6:Core/Src/inverter_broadcast.c **** 
+ 118              		.loc 1 6 18 view .LVU18
+ 119 0044 E6E7     		b	.L2
+ 120              	.LVL13:
+ 121              	.L9:
+  21:Core/Src/inverter_broadcast.c ****   case 0:
+  22:Core/Src/inverter_broadcast.c ****     inv_state = INV_POWER_ON_STATE;
+  23:Core/Src/inverter_broadcast.c ****     break;
+  24:Core/Src/inverter_broadcast.c ****   case 1:
+  25:Core/Src/inverter_broadcast.c ****     inv_state = INV_STOP_STATE;
+  26:Core/Src/inverter_broadcast.c ****     break;
+  27:Core/Src/inverter_broadcast.c ****   case 2:
+  28:Core/Src/inverter_broadcast.c ****     inv_state = INV_OPEN_LOOP_STATE;
+  29:Core/Src/inverter_broadcast.c ****     break;
+  30:Core/Src/inverter_broadcast.c ****   case 3:
+  31:Core/Src/inverter_broadcast.c ****     inv_state = INV_CLOSED_LOOP_STATE;
+  32:Core/Src/inverter_broadcast.c ****     break;
+  33:Core/Src/inverter_broadcast.c ****   case 4:
+  34:Core/Src/inverter_broadcast.c ****     inv_state = INV_WAIT_STATE;
+  35:Core/Src/inverter_broadcast.c ****     break;
+  36:Core/Src/inverter_broadcast.c ****   case 5:
+  37:Core/Src/inverter_broadcast.c ****   case 6:
+  38:Core/Src/inverter_broadcast.c ****   case 7:
+  39:Core/Src/inverter_broadcast.c ****     inv_state = INV_INTERNAL_STATES;
+ 122              		.loc 1 39 5 is_stmt 1 view .LVU19
+  40:Core/Src/inverter_broadcast.c ****     break;
+ 123              		.loc 1 40 5 view .LVU20
+  39:Core/Src/inverter_broadcast.c ****     break;
+ARM GAS  /tmp/ccol55mR.s 			page 4
+
+
+ 124              		.loc 1 39 15 is_stmt 0 view .LVU21
+ 125 0046 0520     		movs	r0, #5
+ 126              	.LVL14:
+ 127              	.L10:
+  41:Core/Src/inverter_broadcast.c ****   case 8:
+  42:Core/Src/inverter_broadcast.c ****     inv_state = INV_IDLE_RUN_STATE;
+  43:Core/Src/inverter_broadcast.c ****     break;
+  44:Core/Src/inverter_broadcast.c ****   case 9:
+  45:Core/Src/inverter_broadcast.c ****     inv_state = INV_IDLE_STOP_STATE;
+  46:Core/Src/inverter_broadcast.c ****     break;
+  47:Core/Src/inverter_broadcast.c ****   case 10:
+  48:Core/Src/inverter_broadcast.c ****   case 11:
+  49:Core/Src/inverter_broadcast.c ****   case 12:
+  50:Core/Src/inverter_broadcast.c ****     inv_state = INV_INTERNAL_STATES;
+  51:Core/Src/inverter_broadcast.c ****     break;
+  52:Core/Src/inverter_broadcast.c ****   default:
+  53:Core/Src/inverter_broadcast.c ****     inv_state = INV_UNKNOWN_STATE;
+  54:Core/Src/inverter_broadcast.c ****     break;
+  55:Core/Src/inverter_broadcast.c ****   }
+  56:Core/Src/inverter_broadcast.c **** 
+  57:Core/Src/inverter_broadcast.c ****   uint8_t relay_state = arr[3];
+ 128              		.loc 1 57 3 is_stmt 1 view .LVU22
+ 129              		.loc 1 57 11 is_stmt 0 view .LVU23
+ 130 0048 91F803A0 		ldrb	r10, [r1, #3]	@ zero_extendqisi2
+ 131              	.LVL15:
+  58:Core/Src/inverter_broadcast.c **** 
+  59:Core/Src/inverter_broadcast.c ****   bool inverter_run_mode = arr[4] & (1 << 0);
+ 132              		.loc 1 59 3 is_stmt 1 view .LVU24
+ 133              		.loc 1 59 31 is_stmt 0 view .LVU25
+ 134 004c 0B79     		ldrb	r3, [r1, #4]	@ zero_extendqisi2
+ 135              		.loc 1 59 8 view .LVU26
+ 136 004e 03F00109 		and	r9, r3, #1
+ 137              	.LVL16:
+  60:Core/Src/inverter_broadcast.c **** 
+  61:Core/Src/inverter_broadcast.c ****   bool self_sensing_assist_enable = arr[4] & (1 << 1);
+ 138              		.loc 1 61 3 is_stmt 1 view .LVU27
+ 139              		.loc 1 61 8 is_stmt 0 view .LVU28
+ 140 0052 C3F34004 		ubfx	r4, r3, #1, #1
+ 141 0056 0094     		str	r4, [sp]
+ 142              	.LVL17:
+  62:Core/Src/inverter_broadcast.c **** 
+  63:Core/Src/inverter_broadcast.c ****   enum INV_ACTIVE_DISCHARGE_STATE active_discharge_state = (arr[4] >> 5);
+ 143              		.loc 1 63 3 is_stmt 1 view .LVU29
+ 144              		.loc 1 63 35 is_stmt 0 view .LVU30
+ 145 0058 5B09     		lsrs	r3, r3, #5
+ 146 005a 0193     		str	r3, [sp, #4]
+ 147              	.LVL18:
+  64:Core/Src/inverter_broadcast.c **** 
+  65:Core/Src/inverter_broadcast.c ****   bool command_mode = arr[5] & (1 << 0);
+ 148              		.loc 1 65 3 is_stmt 1 view .LVU31
+ 149              		.loc 1 65 26 is_stmt 0 view .LVU32
+ 150 005c 4B79     		ldrb	r3, [r1, #5]	@ zero_extendqisi2
+ 151              		.loc 1 65 8 view .LVU33
+ 152 005e 03F00105 		and	r5, r3, #1
+ 153 0062 0295     		str	r5, [sp, #8]
+ 154              	.LVL19:
+  66:Core/Src/inverter_broadcast.c **** 
+ARM GAS  /tmp/ccol55mR.s 			page 5
+
+
+  67:Core/Src/inverter_broadcast.c ****   uint8_t rolling_counter_value = (arr[5] >> 4);
+ 155              		.loc 1 67 3 is_stmt 1 view .LVU34
+ 156              		.loc 1 67 11 is_stmt 0 view .LVU35
+ 157 0064 1E09     		lsrs	r6, r3, #4
+ 158 0066 0396     		str	r6, [sp, #12]
+ 159              	.LVL20:
+  68:Core/Src/inverter_broadcast.c **** 
+  69:Core/Src/inverter_broadcast.c ****   bool inverter_enable_state = (arr[6] & (1 << 0));
+ 160              		.loc 1 69 3 is_stmt 1 view .LVU36
+ 161              		.loc 1 69 36 is_stmt 0 view .LVU37
+ 162 0068 8B79     		ldrb	r3, [r1, #6]	@ zero_extendqisi2
+ 163              		.loc 1 69 8 view .LVU38
+ 164 006a 03F00107 		and	r7, r3, #1
+ 165 006e 0497     		str	r7, [sp, #16]
+ 166              	.LVL21:
+  70:Core/Src/inverter_broadcast.c **** 
+  71:Core/Src/inverter_broadcast.c ****   bool burst_model_mode = (arr[6] & (1 << 1));
+ 167              		.loc 1 71 3 is_stmt 1 view .LVU39
+ 168              		.loc 1 71 8 is_stmt 0 view .LVU40
+ 169 0070 C3F34004 		ubfx	r4, r3, #1, #1
+ 170 0074 0594     		str	r4, [sp, #20]
+ 171              	.LVL22:
+  72:Core/Src/inverter_broadcast.c **** 
+  73:Core/Src/inverter_broadcast.c ****   bool start_mode_active = (arr[6] & (1 << 6));
+ 172              		.loc 1 73 3 is_stmt 1 view .LVU41
+ 173              		.loc 1 73 8 is_stmt 0 view .LVU42
+ 174 0076 C3F38015 		ubfx	r5, r3, #6, #1
+ 175 007a 0695     		str	r5, [sp, #24]
+ 176              	.LVL23:
+  74:Core/Src/inverter_broadcast.c **** 
+  75:Core/Src/inverter_broadcast.c ****   bool inverter_enable_lockout = (arr[6] & (1 << 7));
+ 177              		.loc 1 75 3 is_stmt 1 view .LVU43
+ 178              		.loc 1 75 8 is_stmt 0 view .LVU44
+ 179 007c DB09     		lsrs	r3, r3, #7
+ 180 007e 0793     		str	r3, [sp, #28]
+ 181              	.LVL24:
+  76:Core/Src/inverter_broadcast.c **** 
+  77:Core/Src/inverter_broadcast.c ****   bool direction_command = (arr[7] & (1 << 0));
+ 182              		.loc 1 77 3 is_stmt 1 view .LVU45
+ 183              		.loc 1 77 32 is_stmt 0 view .LVU46
+ 184 0080 CB79     		ldrb	r3, [r1, #7]	@ zero_extendqisi2
+ 185              		.loc 1 77 8 view .LVU47
+ 186 0082 03F00108 		and	r8, r3, #1
+ 187              	.LVL25:
+  78:Core/Src/inverter_broadcast.c **** 
+  79:Core/Src/inverter_broadcast.c ****   bool bms_active = (arr[7] & (1 << 1));
+ 188              		.loc 1 79 3 is_stmt 1 view .LVU48
+ 189              		.loc 1 79 8 is_stmt 0 view .LVU49
+ 190 0086 C3F34007 		ubfx	r7, r3, #1, #1
+ 191              	.LVL26:
+  80:Core/Src/inverter_broadcast.c **** 
+  81:Core/Src/inverter_broadcast.c ****   bool bms_limiting_torque = (arr[7] & (1 << 2));
+ 192              		.loc 1 81 3 is_stmt 1 view .LVU50
+ 193              		.loc 1 81 8 is_stmt 0 view .LVU51
+ 194 008a C3F38006 		ubfx	r6, r3, #2, #1
+ 195              	.LVL27:
+  82:Core/Src/inverter_broadcast.c **** 
+ARM GAS  /tmp/ccol55mR.s 			page 6
+
+
+  83:Core/Src/inverter_broadcast.c ****   bool limit_max_speed = (arr[7] & (1 << 3));
+ 196              		.loc 1 83 3 is_stmt 1 view .LVU52
+ 197              		.loc 1 83 8 is_stmt 0 view .LVU53
+ 198 008e C3F3C005 		ubfx	r5, r3, #3, #1
+ 199              	.LVL28:
+  84:Core/Src/inverter_broadcast.c **** 
+  85:Core/Src/inverter_broadcast.c ****   bool limit_hot_spot = (arr[7] & (1 << 4));
+ 200              		.loc 1 85 3 is_stmt 1 view .LVU54
+ 201              		.loc 1 85 8 is_stmt 0 view .LVU55
+ 202 0092 C3F30014 		ubfx	r4, r3, #4, #1
+ 203              	.LVL29:
+  86:Core/Src/inverter_broadcast.c **** 
+  87:Core/Src/inverter_broadcast.c ****   bool low_speed_limit = (arr[7] & (1 << 5));
+ 204              		.loc 1 87 3 is_stmt 1 view .LVU56
+ 205              		.loc 1 87 8 is_stmt 0 view .LVU57
+ 206 0096 C3F3401E 		ubfx	lr, r3, #5, #1
+ 207              	.LVL30:
+  88:Core/Src/inverter_broadcast.c **** 
+  89:Core/Src/inverter_broadcast.c ****   bool coolant_temp_limiting = (arr[7] & (1 << 6));
+ 208              		.loc 1 89 3 is_stmt 1 view .LVU58
+ 209              		.loc 1 89 8 is_stmt 0 view .LVU59
+ 210 009a C3F38011 		ubfx	r1, r3, #6, #1
+ 211              	.LVL31:
+  90:Core/Src/inverter_broadcast.c **** 
+  91:Core/Src/inverter_broadcast.c ****   bool limit_stall_burst_model = (arr[7] & (1 << 7));
+ 212              		.loc 1 91 3 is_stmt 1 view .LVU60
+ 213              		.loc 1 91 8 is_stmt 0 view .LVU61
+ 214 009e DB09     		lsrs	r3, r3, #7
+ 215              	.LVL32:
+  92:Core/Src/inverter_broadcast.c **** 
+  93:Core/Src/inverter_broadcast.c ****   struct Internal_States internal_state = {
+ 216              		.loc 1 93 3 is_stmt 1 view .LVU62
+ 217              		.loc 1 93 26 is_stmt 0 view .LVU63
+ 218 00a0 8DF82020 		strb	r2, [sp, #32]
+ 219 00a4 8DF821B0 		strb	fp, [sp, #33]
+ 220 00a8 8DF82200 		strb	r0, [sp, #34]
+ 221 00ac 8DF823A0 		strb	r10, [sp, #35]
+ 222 00b0 8DF82490 		strb	r9, [sp, #36]
+ 223 00b4 009A     		ldr	r2, [sp]
+ 224              	.LVL33:
+ 225              		.loc 1 93 26 view .LVU64
+ 226 00b6 8DF82520 		strb	r2, [sp, #37]
+ 227 00ba 019A     		ldr	r2, [sp, #4]
+ 228 00bc 8DF82620 		strb	r2, [sp, #38]
+ 229 00c0 029A     		ldr	r2, [sp, #8]
+ 230 00c2 8DF82720 		strb	r2, [sp, #39]
+ 231 00c6 039A     		ldr	r2, [sp, #12]
+ 232 00c8 8DF82820 		strb	r2, [sp, #40]
+ 233 00cc 049A     		ldr	r2, [sp, #16]
+ 234 00ce 8DF82920 		strb	r2, [sp, #41]
+ 235 00d2 059A     		ldr	r2, [sp, #20]
+ 236 00d4 8DF82A20 		strb	r2, [sp, #42]
+ 237 00d8 069A     		ldr	r2, [sp, #24]
+ 238 00da 8DF82B20 		strb	r2, [sp, #43]
+ 239 00de 079A     		ldr	r2, [sp, #28]
+ 240 00e0 8DF82C20 		strb	r2, [sp, #44]
+ 241 00e4 8DF82D80 		strb	r8, [sp, #45]
+ARM GAS  /tmp/ccol55mR.s 			page 7
+
+
+ 242 00e8 8DF82E70 		strb	r7, [sp, #46]
+ 243 00ec 8DF82F60 		strb	r6, [sp, #47]
+ 244 00f0 8DF83050 		strb	r5, [sp, #48]
+ 245 00f4 8DF83140 		strb	r4, [sp, #49]
+ 246 00f8 8DF832E0 		strb	lr, [sp, #50]
+ 247 00fc 8DF83310 		strb	r1, [sp, #51]
+ 248 0100 8DF83430 		strb	r3, [sp, #52]
+  94:Core/Src/inverter_broadcast.c ****       vsm_state,
+  95:Core/Src/inverter_broadcast.c ****       pwm_frequency,
+  96:Core/Src/inverter_broadcast.c ****       inv_state,
+  97:Core/Src/inverter_broadcast.c ****       relay_state,
+  98:Core/Src/inverter_broadcast.c ****       inverter_run_mode,
+  99:Core/Src/inverter_broadcast.c ****       self_sensing_assist_enable,
+ 100:Core/Src/inverter_broadcast.c ****       active_discharge_state,
+ 101:Core/Src/inverter_broadcast.c ****       command_mode,
+ 102:Core/Src/inverter_broadcast.c ****       rolling_counter_value,
+ 103:Core/Src/inverter_broadcast.c ****       inverter_enable_state,
+ 104:Core/Src/inverter_broadcast.c ****       burst_model_mode,
+ 105:Core/Src/inverter_broadcast.c ****       start_mode_active,
+ 106:Core/Src/inverter_broadcast.c ****       inverter_enable_lockout,
+ 107:Core/Src/inverter_broadcast.c ****       direction_command,
+ 108:Core/Src/inverter_broadcast.c ****       bms_active,
+ 109:Core/Src/inverter_broadcast.c ****       bms_limiting_torque,
+ 110:Core/Src/inverter_broadcast.c ****       limit_max_speed,
+ 111:Core/Src/inverter_broadcast.c ****       limit_hot_spot,
+ 112:Core/Src/inverter_broadcast.c ****       low_speed_limit,
+ 113:Core/Src/inverter_broadcast.c ****       coolant_temp_limiting,
+ 114:Core/Src/inverter_broadcast.c ****       limit_stall_burst_model,
+ 115:Core/Src/inverter_broadcast.c ****   };
+ 116:Core/Src/inverter_broadcast.c **** 
+ 117:Core/Src/inverter_broadcast.c ****   return internal_state;
+ 249              		.loc 1 117 3 is_stmt 1 view .LVU65
+ 250              		.loc 1 117 10 is_stmt 0 view .LVU66
+ 251 0104 08AC     		add	r4, sp, #32
+ 252              	.LVL34:
+ 253              		.loc 1 117 10 view .LVU67
+ 254 0106 0FCC     		ldmia	r4!, {r0, r1, r2, r3}
+ 255              	.LVL35:
+ 256              		.loc 1 117 10 view .LVU68
+ 257 0108 CCF80000 		str	r0, [ip]	@ unaligned
+ 258 010c CCF80410 		str	r1, [ip, #4]	@ unaligned
+ 259 0110 CCF80820 		str	r2, [ip, #8]	@ unaligned
+ 260 0114 CCF80C30 		str	r3, [ip, #12]	@ unaligned
+ 261 0118 2068     		ldr	r0, [r4]
+ 262 011a CCF81000 		str	r0, [ip, #16]	@ unaligned
+ 263 011e 2379     		ldrb	r3, [r4, #4]	@ zero_extendqisi2
+ 264 0120 8CF81430 		strb	r3, [ip, #20]
+ 118:Core/Src/inverter_broadcast.c **** }
+ 265              		.loc 1 118 1 view .LVU69
+ 266 0124 6046     		mov	r0, ip
+ 267 0126 0FB0     		add	sp, sp, #60
+ 268              	.LCFI2:
+ 269              		.cfi_remember_state
+ 270              		.cfi_def_cfa_offset 36
+ 271              	.LVL36:
+ 272              		.loc 1 118 1 view .LVU70
+ 273              		@ sp needed
+ARM GAS  /tmp/ccol55mR.s 			page 8
+
+
+ 274 0128 BDE8F08F 		pop	{r4, r5, r6, r7, r8, r9, r10, fp, pc}
+ 275              	.LVL37:
+ 276              	.L8:
+ 277              	.LCFI3:
+ 278              		.cfi_restore_state
+  42:Core/Src/inverter_broadcast.c ****     break;
+ 279              		.loc 1 42 5 is_stmt 1 view .LVU71
+  43:Core/Src/inverter_broadcast.c ****   case 9:
+ 280              		.loc 1 43 5 view .LVU72
+  42:Core/Src/inverter_broadcast.c ****     break;
+ 281              		.loc 1 42 15 is_stmt 0 view .LVU73
+ 282 012c 0620     		movs	r0, #6
+  43:Core/Src/inverter_broadcast.c ****   case 9:
+ 283              		.loc 1 43 5 view .LVU74
+ 284 012e 8BE7     		b	.L10
+ 285              	.LVL38:
+ 286              	.L7:
+  45:Core/Src/inverter_broadcast.c ****     break;
+ 287              		.loc 1 45 5 is_stmt 1 view .LVU75
+  46:Core/Src/inverter_broadcast.c ****   case 10:
+ 288              		.loc 1 46 5 view .LVU76
+  45:Core/Src/inverter_broadcast.c ****     break;
+ 289              		.loc 1 45 15 is_stmt 0 view .LVU77
+ 290 0130 0720     		movs	r0, #7
+  46:Core/Src/inverter_broadcast.c ****   case 10:
+ 291              		.loc 1 46 5 view .LVU78
+ 292 0132 89E7     		b	.L10
+ 293              	.LVL39:
+ 294              	.L5:
+  50:Core/Src/inverter_broadcast.c ****     break;
+ 295              		.loc 1 50 5 is_stmt 1 view .LVU79
+  51:Core/Src/inverter_broadcast.c ****   default:
+ 296              		.loc 1 51 5 view .LVU80
+  50:Core/Src/inverter_broadcast.c ****     break;
+ 297              		.loc 1 50 15 is_stmt 0 view .LVU81
+ 298 0134 0520     		movs	r0, #5
+  51:Core/Src/inverter_broadcast.c ****   default:
+ 299              		.loc 1 51 5 view .LVU82
+ 300 0136 87E7     		b	.L10
+ 301              	.LVL40:
+ 302              	.L4:
+  53:Core/Src/inverter_broadcast.c ****     break;
+ 303              		.loc 1 53 5 is_stmt 1 view .LVU83
+  54:Core/Src/inverter_broadcast.c ****   }
+ 304              		.loc 1 54 5 view .LVU84
+  53:Core/Src/inverter_broadcast.c ****     break;
+ 305              		.loc 1 53 15 is_stmt 0 view .LVU85
+ 306 0138 0820     		movs	r0, #8
+  54:Core/Src/inverter_broadcast.c ****   }
+ 307              		.loc 1 54 5 view .LVU86
+ 308 013a 85E7     		b	.L10
+ 309              		.cfi_endproc
+ 310              	.LFE0:
+ 312              		.section	.text.Parse_Fault_Codes,"ax",%progbits
+ 313              		.align	1
+ 314              		.global	Parse_Fault_Codes
+ 315              		.syntax unified
+ARM GAS  /tmp/ccol55mR.s 			page 9
+
+
+ 316              		.thumb
+ 317              		.thumb_func
+ 319              	Parse_Fault_Codes:
+ 320              	.LVL41:
+ 321              	.LFB1:
+ 119:Core/Src/inverter_broadcast.c **** 
+ 120:Core/Src/inverter_broadcast.c **** struct Fault_Codes Parse_Fault_Codes(uint8_t *arr) {
+ 322              		.loc 1 120 52 is_stmt 1 view -0
+ 323              		.cfi_startproc
+ 324              		@ args = 0, pretend = 0, frame = 64
+ 325              		@ frame_needed = 0, uses_anonymous_args = 0
+ 326              		.loc 1 120 52 is_stmt 0 view .LVU88
+ 327 0000 70B5     		push	{r4, r5, r6, lr}
+ 328              	.LCFI4:
+ 329              		.cfi_def_cfa_offset 16
+ 330              		.cfi_offset 4, -16
+ 331              		.cfi_offset 5, -12
+ 332              		.cfi_offset 6, -8
+ 333              		.cfi_offset 14, -4
+ 334 0002 90B0     		sub	sp, sp, #64
+ 335              	.LCFI5:
+ 336              		.cfi_def_cfa_offset 80
+ 337 0004 0446     		mov	r4, r0
+ 338 0006 0E46     		mov	r6, r1
+ 121:Core/Src/inverter_broadcast.c ****   uint64_t fault_codes_as_uint64[8] = {0};
+ 339              		.loc 1 121 3 is_stmt 1 view .LVU89
+ 340              		.loc 1 121 12 is_stmt 0 view .LVU90
+ 341 0008 4022     		movs	r2, #64
+ 342 000a 0021     		movs	r1, #0
+ 343              	.LVL42:
+ 344              		.loc 1 121 12 view .LVU91
+ 345 000c 6846     		mov	r0, sp
+ 346              	.LVL43:
+ 347              		.loc 1 121 12 view .LVU92
+ 348 000e FFF7FEFF 		bl	memset
+ 349              	.LVL44:
+ 122:Core/Src/inverter_broadcast.c **** 
+ 123:Core/Src/inverter_broadcast.c ****   // need to cast it into uint64_t in order to
+ 124:Core/Src/inverter_broadcast.c ****   // make the bit shifts with width >= 8
+ 125:Core/Src/inverter_broadcast.c ****   for (int i = 0; i < 8; i++) {
+ 350              		.loc 1 125 3 is_stmt 1 view .LVU93
+ 351              	.LBB2:
+ 352              		.loc 1 125 8 view .LVU94
+ 353              		.loc 1 125 12 is_stmt 0 view .LVU95
+ 354 0012 0023     		movs	r3, #0
+ 355              		.loc 1 125 3 view .LVU96
+ 356 0014 0AE0     		b	.L17
+ 357              	.LVL45:
+ 358              	.L18:
+ 126:Core/Src/inverter_broadcast.c ****     fault_codes_as_uint64[i] = arr[i];
+ 359              		.loc 1 126 5 is_stmt 1 view .LVU97
+ 360              		.loc 1 126 35 is_stmt 0 view .LVU98
+ 361 0016 F55C     		ldrb	r5, [r6, r3]	@ zero_extendqisi2
+ 362              		.loc 1 126 30 view .LVU99
+ 363 0018 10AA     		add	r2, sp, #64
+ 364 001a 02EBC302 		add	r2, r2, r3, lsl #3
+ 365 001e A2F14000 		sub	r0, r2, #64
+ARM GAS  /tmp/ccol55mR.s 			page 10
+
+
+ 366 0022 42F8405C 		str	r5, [r2, #-64]
+ 367 0026 0022     		movs	r2, #0
+ 368 0028 4260     		str	r2, [r0, #4]
+ 125:Core/Src/inverter_broadcast.c ****     fault_codes_as_uint64[i] = arr[i];
+ 369              		.loc 1 125 27 is_stmt 1 discriminator 3 view .LVU100
+ 370 002a 0133     		adds	r3, r3, #1
+ 371              	.LVL46:
+ 372              	.L17:
+ 125:Core/Src/inverter_broadcast.c ****     fault_codes_as_uint64[i] = arr[i];
+ 373              		.loc 1 125 21 discriminator 1 view .LVU101
+ 374 002c 072B     		cmp	r3, #7
+ 375 002e F2DD     		ble	.L18
+ 376              	.LBE2:
+ 127:Core/Src/inverter_broadcast.c ****   }
+ 128:Core/Src/inverter_broadcast.c **** 
+ 129:Core/Src/inverter_broadcast.c ****   uint64_t final_mask =
+ 377              		.loc 1 129 3 view .LVU102
+ 130:Core/Src/inverter_broadcast.c ****       (fault_codes_as_uint64[0] | (fault_codes_as_uint64[1] << 8) |
+ 378              		.loc 1 130 57 is_stmt 0 view .LVU103
+ 379 0030 029A     		ldr	r2, [sp, #8]
+ 380 0032 0399     		ldr	r1, [sp, #12]
+ 381              		.loc 1 130 61 view .LVU104
+ 382 0034 0902     		lsls	r1, r1, #8
+ 383 0036 41EA1261 		orr	r1, r1, r2, lsr #24
+ 384              		.loc 1 130 33 view .LVU105
+ 385 003a 009B     		ldr	r3, [sp]
+ 386              	.LVL47:
+ 387              		.loc 1 130 33 view .LVU106
+ 388 003c 43EA0222 		orr	r2, r3, r2, lsl #8
+ 389 0040 019B     		ldr	r3, [sp, #4]
+ 390 0042 0B43     		orrs	r3, r3, r1
+ 131:Core/Src/inverter_broadcast.c ****        (fault_codes_as_uint64[2] << 16) | (fault_codes_as_uint64[3] << 24) |
+ 391              		.loc 1 131 30 view .LVU107
+ 392 0044 0498     		ldr	r0, [sp, #16]
+ 393 0046 0599     		ldr	r1, [sp, #20]
+ 394              		.loc 1 131 34 view .LVU108
+ 395 0048 0904     		lsls	r1, r1, #16
+ 396 004a 41EA1041 		orr	r1, r1, r0, lsr #16
+ 130:Core/Src/inverter_broadcast.c ****       (fault_codes_as_uint64[0] | (fault_codes_as_uint64[1] << 8) |
+ 397              		.loc 1 130 67 view .LVU109
+ 398 004e 42EA0042 		orr	r2, r2, r0, lsl #16
+ 399 0052 0B43     		orrs	r3, r3, r1
+ 400              		.loc 1 131 65 view .LVU110
+ 401 0054 0698     		ldr	r0, [sp, #24]
+ 402 0056 0799     		ldr	r1, [sp, #28]
+ 403              		.loc 1 131 69 view .LVU111
+ 404 0058 0906     		lsls	r1, r1, #24
+ 405 005a 41EA1021 		orr	r1, r1, r0, lsr #8
+ 406              		.loc 1 131 41 view .LVU112
+ 407 005e 42EA0062 		orr	r2, r2, r0, lsl #24
+ 408 0062 0B43     		orrs	r3, r3, r1
+ 132:Core/Src/inverter_broadcast.c ****        (fault_codes_as_uint64[4] << 32) | (fault_codes_as_uint64[5] << 40) |
+ 409              		.loc 1 132 30 view .LVU113
+ 410 0064 0899     		ldr	r1, [sp, #32]
+ 131:Core/Src/inverter_broadcast.c ****        (fault_codes_as_uint64[2] << 16) | (fault_codes_as_uint64[3] << 24) |
+ 411              		.loc 1 131 76 view .LVU114
+ 412 0066 0B43     		orrs	r3, r3, r1
+ARM GAS  /tmp/ccol55mR.s 			page 11
+
+
+ 413              		.loc 1 132 41 view .LVU115
+ 414 0068 0A99     		ldr	r1, [sp, #40]
+ 415 006a 43EA0123 		orr	r3, r3, r1, lsl #8
+ 416              		.loc 1 132 76 view .LVU116
+ 417 006e 0C99     		ldr	r1, [sp, #48]
+ 418 0070 43EA0143 		orr	r3, r3, r1, lsl #16
+ 129:Core/Src/inverter_broadcast.c ****       (fault_codes_as_uint64[0] | (fault_codes_as_uint64[1] << 8) |
+ 419              		.loc 1 129 12 view .LVU117
+ 420 0074 0E99     		ldr	r1, [sp, #56]
+ 421 0076 43EA0163 		orr	r3, r3, r1, lsl #24
+ 422              	.LVL48:
+ 133:Core/Src/inverter_broadcast.c ****        (fault_codes_as_uint64[6] << 48) | (fault_codes_as_uint64[7] << 56));
+ 134:Core/Src/inverter_broadcast.c **** 
+ 135:Core/Src/inverter_broadcast.c ****   struct Fault_Codes fault_codes = {final_mask};
+ 423              		.loc 1 135 3 is_stmt 1 view .LVU118
+ 424              		.loc 1 135 22 is_stmt 0 view .LVU119
+ 425 007a 2260     		str	r2, [r4]
+ 426 007c 6360     		str	r3, [r4, #4]
+ 136:Core/Src/inverter_broadcast.c **** 
+ 137:Core/Src/inverter_broadcast.c ****   return fault_codes;
+ 427              		.loc 1 137 3 is_stmt 1 view .LVU120
+ 138:Core/Src/inverter_broadcast.c **** }
+ 428              		.loc 1 138 1 is_stmt 0 view .LVU121
+ 429 007e 2046     		mov	r0, r4
+ 430 0080 10B0     		add	sp, sp, #64
+ 431              	.LCFI6:
+ 432              		.cfi_def_cfa_offset 16
+ 433              		@ sp needed
+ 434 0082 70BD     		pop	{r4, r5, r6, pc}
+ 435              		.loc 1 138 1 view .LVU122
+ 436              		.cfi_endproc
+ 437              	.LFE1:
+ 439              		.section	.text.Check_Fault_Codes,"ax",%progbits
+ 440              		.align	1
+ 441              		.global	Check_Fault_Codes
+ 442              		.syntax unified
+ 443              		.thumb
+ 444              		.thumb_func
+ 446              	Check_Fault_Codes:
+ 447              	.LVL49:
+ 448              	.LFB2:
+ 139:Core/Src/inverter_broadcast.c **** 
+ 140:Core/Src/inverter_broadcast.c **** size_t Check_Fault_Codes(struct Fault_Codes fault_codes,
+ 141:Core/Src/inverter_broadcast.c ****                          enum POSSIBLE_FAULTS *buff) {
+ 449              		.loc 1 141 54 is_stmt 1 view -0
+ 450              		.cfi_startproc
+ 451              		@ args = 0, pretend = 0, frame = 0
+ 452              		@ frame_needed = 0, uses_anonymous_args = 0
+ 453              		.loc 1 141 54 is_stmt 0 view .LVU124
+ 454 0000 F0B5     		push	{r4, r5, r6, r7, lr}
+ 455              	.LCFI7:
+ 456              		.cfi_def_cfa_offset 20
+ 457              		.cfi_offset 4, -20
+ 458              		.cfi_offset 5, -16
+ 459              		.cfi_offset 6, -12
+ 460              		.cfi_offset 7, -8
+ 461              		.cfi_offset 14, -4
+ARM GAS  /tmp/ccol55mR.s 			page 12
+
+
+ 462 0002 0646     		mov	r6, r0
+ 463              	.LVL50:
+ 464              		.loc 1 141 54 view .LVU125
+ 465 0004 0C46     		mov	r4, r1
+ 466              		.loc 1 141 54 view .LVU126
+ 467 0006 1546     		mov	r5, r2
+ 142:Core/Src/inverter_broadcast.c ****   size_t k = 0;
+ 468              		.loc 1 142 3 is_stmt 1 view .LVU127
+ 469              	.LVL51:
+ 143:Core/Src/inverter_broadcast.c ****   for (int i = 0; i < 64; i++) {
+ 470              		.loc 1 143 3 view .LVU128
+ 471              	.LBB3:
+ 472              		.loc 1 143 8 view .LVU129
+ 473              		.loc 1 143 12 is_stmt 0 view .LVU130
+ 474 0008 0023     		movs	r3, #0
+ 475              	.LBE3:
+ 142:Core/Src/inverter_broadcast.c ****   size_t k = 0;
+ 476              		.loc 1 142 10 view .LVU131
+ 477 000a 1846     		mov	r0, r3
+ 478              	.LBB4:
+ 479              		.loc 1 143 3 view .LVU132
+ 480 000c 00E0     		b	.L21
+ 481              	.LVL52:
+ 482              	.L22:
+ 483              		.loc 1 143 28 is_stmt 1 discriminator 2 view .LVU133
+ 484 000e 0133     		adds	r3, r3, #1
+ 485              	.LVL53:
+ 486              	.L21:
+ 487              		.loc 1 143 21 discriminator 1 view .LVU134
+ 488 0010 3F2B     		cmp	r3, #63
+ 489 0012 25DC     		bgt	.L25
+ 144:Core/Src/inverter_broadcast.c ****     if (fault_codes.mask & (((uint64_t)1) << i)) {
+ 490              		.loc 1 144 5 view .LVU135
+ 491              		.loc 1 144 9 is_stmt 0 view .LVU136
+ 492 0014 C3F12001 		rsb	r1, r3, #32
+ 493 0018 A3F1200E 		sub	lr, r3, #32
+ 494 001c 26FA03FC 		lsr	ip, r6, r3
+ 495 0020 04FA01F1 		lsl	r1, r4, r1
+ 496 0024 4CEA010C 		orr	ip, ip, r1
+ 497 0028 24FA0EFE 		lsr	lr, r4, lr
+ 498 002c 4CEA0E0C 		orr	ip, ip, lr
+ 499              		.loc 1 144 8 view .LVU137
+ 500 0030 1CF0010F 		tst	ip, #1
+ 501 0034 EBD0     		beq	.L22
+ 145:Core/Src/inverter_broadcast.c ****       buff[k++] = (enum POSSIBLE_FAULTS)(((uint64_t)1) << i);
+ 502              		.loc 1 145 7 is_stmt 1 view .LVU138
+ 503              	.LVL54:
+ 504              		.loc 1 145 11 is_stmt 0 view .LVU139
+ 505 0036 05EBC007 		add	r7, r5, r0, lsl #3
+ 506              		.loc 1 145 56 view .LVU140
+ 507 003a 4FF0010E 		mov	lr, #1
+ 508 003e A3F1200C 		sub	ip, r3, #32
+ 509 0042 C3F12001 		rsb	r1, r3, #32
+ 510 0046 0EFA0CFC 		lsl	ip, lr, ip
+ 511 004a 2EFA01F1 		lsr	r1, lr, r1
+ 512 004e 4CEA0101 		orr	r1, ip, r1
+ 513 0052 0EFA03F2 		lsl	r2, lr, r3
+ARM GAS  /tmp/ccol55mR.s 			page 13
+
+
+ 514              		.loc 1 145 17 view .LVU141
+ 515 0056 45F83020 		str	r2, [r5, r0, lsl #3]
+ 516 005a 7960     		str	r1, [r7, #4]
+ 517              		.loc 1 145 13 view .LVU142
+ 518 005c 7044     		add	r0, r0, lr
+ 519              	.LVL55:
+ 520              		.loc 1 145 13 view .LVU143
+ 521 005e D6E7     		b	.L22
+ 522              	.L25:
+ 523              		.loc 1 145 13 view .LVU144
+ 524              	.LBE4:
+ 146:Core/Src/inverter_broadcast.c ****     }
+ 147:Core/Src/inverter_broadcast.c ****   }
+ 148:Core/Src/inverter_broadcast.c **** 
+ 149:Core/Src/inverter_broadcast.c ****   return k;
+ 525              		.loc 1 149 3 is_stmt 1 view .LVU145
+ 150:Core/Src/inverter_broadcast.c **** }
+ 526              		.loc 1 150 1 is_stmt 0 view .LVU146
+ 527 0060 F0BD     		pop	{r4, r5, r6, r7, pc}
+ 528              		.loc 1 150 1 view .LVU147
+ 529              		.cfi_endproc
+ 530              	.LFE2:
+ 532              		.section	.text.Parse_Motor_Position_Information,"ax",%progbits
+ 533              		.align	1
+ 534              		.global	Parse_Motor_Position_Information
+ 535              		.syntax unified
+ 536              		.thumb
+ 537              		.thumb_func
+ 539              	Parse_Motor_Position_Information:
+ 540              	.LVL56:
+ 541              	.LFB3:
+ 151:Core/Src/inverter_broadcast.c **** 
+ 152:Core/Src/inverter_broadcast.c **** struct Motor_Position_Information
+ 153:Core/Src/inverter_broadcast.c **** Parse_Motor_Position_Information(uint8_t *arr) {
+ 542              		.loc 1 153 48 is_stmt 1 view -0
+ 543              		.cfi_startproc
+ 544              		@ args = 0, pretend = 0, frame = 8
+ 545              		@ frame_needed = 0, uses_anonymous_args = 0
+ 546              		.loc 1 153 48 is_stmt 0 view .LVU149
+ 547 0000 10B5     		push	{r4, lr}
+ 548              	.LCFI8:
+ 549              		.cfi_def_cfa_offset 8
+ 550              		.cfi_offset 4, -8
+ 551              		.cfi_offset 14, -4
+ 552 0002 82B0     		sub	sp, sp, #8
+ 553              	.LCFI9:
+ 554              		.cfi_def_cfa_offset 16
+ 555 0004 0346     		mov	r3, r0
+ 154:Core/Src/inverter_broadcast.c **** 
+ 155:Core/Src/inverter_broadcast.c ****   int16_t motor_angle = ((int16_t)arr[0]) | (((int16_t)arr[1]) << 8);
+ 556              		.loc 1 155 3 is_stmt 1 view .LVU150
+ 557              		.loc 1 155 38 is_stmt 0 view .LVU151
+ 558 0006 91F800C0 		ldrb	ip, [r1]	@ zero_extendqisi2
+ 559              		.loc 1 155 59 view .LVU152
+ 560 000a 4A78     		ldrb	r2, [r1, #1]	@ zero_extendqisi2
+ 561              		.loc 1 155 43 view .LVU153
+ 562 000c 1202     		lsls	r2, r2, #8
+ARM GAS  /tmp/ccol55mR.s 			page 14
+
+
+ 563 000e 12B2     		sxth	r2, r2
+ 564              		.loc 1 155 11 view .LVU154
+ 565 0010 4CEA020C 		orr	ip, ip, r2
+ 566              	.LVL57:
+ 156:Core/Src/inverter_broadcast.c ****   int16_t motor_speed = ((int16_t)arr[2]) | (((int16_t)arr[3]) << 8);
+ 567              		.loc 1 156 3 is_stmt 1 view .LVU155
+ 568              		.loc 1 156 38 is_stmt 0 view .LVU156
+ 569 0014 8C78     		ldrb	r4, [r1, #2]	@ zero_extendqisi2
+ 570              		.loc 1 156 59 view .LVU157
+ 571 0016 CA78     		ldrb	r2, [r1, #3]	@ zero_extendqisi2
+ 572              		.loc 1 156 43 view .LVU158
+ 573 0018 1202     		lsls	r2, r2, #8
+ 574 001a 12B2     		sxth	r2, r2
+ 575              		.loc 1 156 11 view .LVU159
+ 576 001c 1443     		orrs	r4, r4, r2
+ 577              	.LVL58:
+ 157:Core/Src/inverter_broadcast.c ****   int16_t electrical_output_freq = ((int16_t)arr[4]) | (((int16_t)arr[5]) << 8);
+ 578              		.loc 1 157 3 is_stmt 1 view .LVU160
+ 579              		.loc 1 157 49 is_stmt 0 view .LVU161
+ 580 001e 91F804E0 		ldrb	lr, [r1, #4]	@ zero_extendqisi2
+ 581              		.loc 1 157 70 view .LVU162
+ 582 0022 4A79     		ldrb	r2, [r1, #5]	@ zero_extendqisi2
+ 583              		.loc 1 157 54 view .LVU163
+ 584 0024 1202     		lsls	r2, r2, #8
+ 585 0026 12B2     		sxth	r2, r2
+ 586              		.loc 1 157 11 view .LVU164
+ 587 0028 4EEA020E 		orr	lr, lr, r2
+ 588              	.LVL59:
+ 158:Core/Src/inverter_broadcast.c ****   int16_t delta_resolver_filtered =
+ 589              		.loc 1 158 3 is_stmt 1 view .LVU165
+ 159:Core/Src/inverter_broadcast.c ****       ((int16_t)arr[6]) | (((int16_t)arr[7]) << 8);
+ 590              		.loc 1 159 20 is_stmt 0 view .LVU166
+ 591 002c 8879     		ldrb	r0, [r1, #6]	@ zero_extendqisi2
+ 592              	.LVL60:
+ 593              		.loc 1 159 41 view .LVU167
+ 594 002e CA79     		ldrb	r2, [r1, #7]	@ zero_extendqisi2
+ 595              		.loc 1 159 25 view .LVU168
+ 596 0030 1202     		lsls	r2, r2, #8
+ 597 0032 12B2     		sxth	r2, r2
+ 158:Core/Src/inverter_broadcast.c ****   int16_t delta_resolver_filtered =
+ 598              		.loc 1 158 11 view .LVU169
+ 599 0034 0243     		orrs	r2, r2, r0
+ 600              	.LVL61:
+ 160:Core/Src/inverter_broadcast.c **** 
+ 161:Core/Src/inverter_broadcast.c ****   struct Motor_Position_Information motor_position_information = {
+ 601              		.loc 1 161 3 is_stmt 1 view .LVU170
+ 602              		.loc 1 161 37 is_stmt 0 view .LVU171
+ 603 0036 ADF800C0 		strh	ip, [sp]	@ movhi
+ 604 003a ADF80240 		strh	r4, [sp, #2]	@ movhi
+ 605 003e ADF804E0 		strh	lr, [sp, #4]	@ movhi
+ 606 0042 ADF80620 		strh	r2, [sp, #6]	@ movhi
+ 162:Core/Src/inverter_broadcast.c ****       motor_angle,
+ 163:Core/Src/inverter_broadcast.c ****       motor_speed,
+ 164:Core/Src/inverter_broadcast.c ****       electrical_output_freq,
+ 165:Core/Src/inverter_broadcast.c ****       delta_resolver_filtered,
+ 166:Core/Src/inverter_broadcast.c ****   };
+ 167:Core/Src/inverter_broadcast.c **** 
+ARM GAS  /tmp/ccol55mR.s 			page 15
+
+
+ 168:Core/Src/inverter_broadcast.c ****   return motor_position_information;
+ 607              		.loc 1 168 3 is_stmt 1 view .LVU172
+ 608              		.loc 1 168 10 is_stmt 0 view .LVU173
+ 609 0046 6A46     		mov	r2, sp
+ 610              	.LVL62:
+ 611              		.loc 1 168 10 view .LVU174
+ 612 0048 03CA     		ldmia	r2!, {r0, r1}
+ 613              	.LVL63:
+ 614              		.loc 1 168 10 view .LVU175
+ 615 004a 1860     		str	r0, [r3]	@ unaligned
+ 616 004c 5960     		str	r1, [r3, #4]	@ unaligned
+ 169:Core/Src/inverter_broadcast.c **** }
+ 617              		.loc 1 169 1 view .LVU176
+ 618 004e 1846     		mov	r0, r3
+ 619 0050 02B0     		add	sp, sp, #8
+ 620              	.LCFI10:
+ 621              		.cfi_def_cfa_offset 8
+ 622              		@ sp needed
+ 623 0052 10BD     		pop	{r4, pc}
+ 624              		.loc 1 169 1 view .LVU177
+ 625              		.cfi_endproc
+ 626              	.LFE3:
+ 628              		.section	.text.Parse_Voltage_Information,"ax",%progbits
+ 629              		.align	1
+ 630              		.global	Parse_Voltage_Information
+ 631              		.syntax unified
+ 632              		.thumb
+ 633              		.thumb_func
+ 635              	Parse_Voltage_Information:
+ 636              	.LVL64:
+ 637              	.LFB4:
+ 170:Core/Src/inverter_broadcast.c **** 
+ 171:Core/Src/inverter_broadcast.c **** struct Voltage_Information Parse_Voltage_Information(uint8_t *arr) {
+ 638              		.loc 1 171 68 is_stmt 1 view -0
+ 639              		.cfi_startproc
+ 640              		@ args = 0, pretend = 0, frame = 8
+ 641              		@ frame_needed = 0, uses_anonymous_args = 0
+ 642              		.loc 1 171 68 is_stmt 0 view .LVU179
+ 643 0000 10B5     		push	{r4, lr}
+ 644              	.LCFI11:
+ 645              		.cfi_def_cfa_offset 8
+ 646              		.cfi_offset 4, -8
+ 647              		.cfi_offset 14, -4
+ 648 0002 82B0     		sub	sp, sp, #8
+ 649              	.LCFI12:
+ 650              		.cfi_def_cfa_offset 16
+ 651 0004 0346     		mov	r3, r0
+ 172:Core/Src/inverter_broadcast.c ****   int16_t dc_buc_voltage = ((int16_t)arr[0]) | (((int16_t)arr[1]) << 8);
+ 652              		.loc 1 172 3 is_stmt 1 view .LVU180
+ 653              		.loc 1 172 41 is_stmt 0 view .LVU181
+ 654 0006 91F800C0 		ldrb	ip, [r1]	@ zero_extendqisi2
+ 655              		.loc 1 172 62 view .LVU182
+ 656 000a 4A78     		ldrb	r2, [r1, #1]	@ zero_extendqisi2
+ 657              		.loc 1 172 46 view .LVU183
+ 658 000c 1202     		lsls	r2, r2, #8
+ 659 000e 12B2     		sxth	r2, r2
+ 660              		.loc 1 172 11 view .LVU184
+ARM GAS  /tmp/ccol55mR.s 			page 16
+
+
+ 661 0010 4CEA020C 		orr	ip, ip, r2
+ 662              	.LVL65:
+ 173:Core/Src/inverter_broadcast.c ****   int16_t output_voltage = ((int16_t)arr[2]) | (((int16_t)arr[3]) << 8);
+ 663              		.loc 1 173 3 is_stmt 1 view .LVU185
+ 664              		.loc 1 173 41 is_stmt 0 view .LVU186
+ 665 0014 8C78     		ldrb	r4, [r1, #2]	@ zero_extendqisi2
+ 666              		.loc 1 173 62 view .LVU187
+ 667 0016 CA78     		ldrb	r2, [r1, #3]	@ zero_extendqisi2
+ 668              		.loc 1 173 46 view .LVU188
+ 669 0018 1202     		lsls	r2, r2, #8
+ 670 001a 12B2     		sxth	r2, r2
+ 671              		.loc 1 173 11 view .LVU189
+ 672 001c 1443     		orrs	r4, r4, r2
+ 673              	.LVL66:
+ 174:Core/Src/inverter_broadcast.c ****   int16_t vab_vd_voltage = ((int16_t)arr[4]) | (((int16_t)arr[5]) << 8);
+ 674              		.loc 1 174 3 is_stmt 1 view .LVU190
+ 675              		.loc 1 174 41 is_stmt 0 view .LVU191
+ 676 001e 91F804E0 		ldrb	lr, [r1, #4]	@ zero_extendqisi2
+ 677              		.loc 1 174 62 view .LVU192
+ 678 0022 4A79     		ldrb	r2, [r1, #5]	@ zero_extendqisi2
+ 679              		.loc 1 174 46 view .LVU193
+ 680 0024 1202     		lsls	r2, r2, #8
+ 681 0026 12B2     		sxth	r2, r2
+ 682              		.loc 1 174 11 view .LVU194
+ 683 0028 4EEA020E 		orr	lr, lr, r2
+ 684              	.LVL67:
+ 175:Core/Src/inverter_broadcast.c ****   int16_t vbc_vq_voltage = ((int16_t)arr[6]) | (((int16_t)arr[7]) << 8);
+ 685              		.loc 1 175 3 is_stmt 1 view .LVU195
+ 686              		.loc 1 175 41 is_stmt 0 view .LVU196
+ 687 002c 8879     		ldrb	r0, [r1, #6]	@ zero_extendqisi2
+ 688              	.LVL68:
+ 689              		.loc 1 175 62 view .LVU197
+ 690 002e CA79     		ldrb	r2, [r1, #7]	@ zero_extendqisi2
+ 691              		.loc 1 175 46 view .LVU198
+ 692 0030 1202     		lsls	r2, r2, #8
+ 693 0032 12B2     		sxth	r2, r2
+ 694              		.loc 1 175 11 view .LVU199
+ 695 0034 0243     		orrs	r2, r2, r0
+ 696              	.LVL69:
+ 176:Core/Src/inverter_broadcast.c **** 
+ 177:Core/Src/inverter_broadcast.c ****   struct Voltage_Information voltage_information = {
+ 697              		.loc 1 177 3 is_stmt 1 view .LVU200
+ 698              		.loc 1 177 30 is_stmt 0 view .LVU201
+ 699 0036 ADF800C0 		strh	ip, [sp]	@ movhi
+ 700 003a ADF80240 		strh	r4, [sp, #2]	@ movhi
+ 701 003e ADF804E0 		strh	lr, [sp, #4]	@ movhi
+ 702 0042 ADF80620 		strh	r2, [sp, #6]	@ movhi
+ 178:Core/Src/inverter_broadcast.c ****       dc_buc_voltage,
+ 179:Core/Src/inverter_broadcast.c ****       output_voltage,
+ 180:Core/Src/inverter_broadcast.c ****       vab_vd_voltage,
+ 181:Core/Src/inverter_broadcast.c ****       vbc_vq_voltage,
+ 182:Core/Src/inverter_broadcast.c ****   };
+ 183:Core/Src/inverter_broadcast.c **** 
+ 184:Core/Src/inverter_broadcast.c ****   return voltage_information;
+ 703              		.loc 1 184 3 is_stmt 1 view .LVU202
+ 704              		.loc 1 184 10 is_stmt 0 view .LVU203
+ 705 0046 6A46     		mov	r2, sp
+ARM GAS  /tmp/ccol55mR.s 			page 17
+
+
+ 706              	.LVL70:
+ 707              		.loc 1 184 10 view .LVU204
+ 708 0048 03CA     		ldmia	r2!, {r0, r1}
+ 709              	.LVL71:
+ 710              		.loc 1 184 10 view .LVU205
+ 711 004a 1860     		str	r0, [r3]	@ unaligned
+ 712 004c 5960     		str	r1, [r3, #4]	@ unaligned
+ 185:Core/Src/inverter_broadcast.c **** }
+ 713              		.loc 1 185 1 view .LVU206
+ 714 004e 1846     		mov	r0, r3
+ 715 0050 02B0     		add	sp, sp, #8
+ 716              	.LCFI13:
+ 717              		.cfi_def_cfa_offset 8
+ 718              		@ sp needed
+ 719 0052 10BD     		pop	{r4, pc}
+ 720              		.loc 1 185 1 view .LVU207
+ 721              		.cfi_endproc
+ 722              	.LFE4:
+ 724              		.text
+ 725              	.Letext0:
+ 726              		.file 2 "/usr/lib/gcc/arm-none-eabi/13.2.1/include/stddef.h"
+ 727              		.file 3 "/usr/lib/gcc/arm-none-eabi/13.2.1/include/stdint.h"
+ 728              		.file 4 "Core/Inc/inverter_broadcast.h"
+ 729              		.file 5 "<built-in>"
+ARM GAS  /tmp/ccol55mR.s 			page 18
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 inverter_broadcast.c
+     /tmp/ccol55mR.s:20     .text.Parse_Internal_States:00000000 $t
+     /tmp/ccol55mR.s:26     .text.Parse_Internal_States:00000000 Parse_Internal_States
+     /tmp/ccol55mR.s:76     .text.Parse_Internal_States:00000024 $d
+     /tmp/ccol55mR.s:313    .text.Parse_Fault_Codes:00000000 $t
+     /tmp/ccol55mR.s:319    .text.Parse_Fault_Codes:00000000 Parse_Fault_Codes
+     /tmp/ccol55mR.s:440    .text.Check_Fault_Codes:00000000 $t
+     /tmp/ccol55mR.s:446    .text.Check_Fault_Codes:00000000 Check_Fault_Codes
+     /tmp/ccol55mR.s:533    .text.Parse_Motor_Position_Information:00000000 $t
+     /tmp/ccol55mR.s:539    .text.Parse_Motor_Position_Information:00000000 Parse_Motor_Position_Information
+     /tmp/ccol55mR.s:629    .text.Parse_Voltage_Information:00000000 $t
+     /tmp/ccol55mR.s:635    .text.Parse_Voltage_Information:00000000 Parse_Voltage_Information
+     /tmp/ccol55mR.s:90     .text.Parse_Internal_States:00000031 $d
+     /tmp/ccol55mR.s:90     .text.Parse_Internal_States:00000032 $t
+
+UNDEFINED SYMBOLS
+memset
