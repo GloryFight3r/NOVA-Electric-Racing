@@ -22,7 +22,9 @@
 #include "eth.h"
 #include "gpio.h"
 #include "stm32f767xx.h"
+#include "stm32f7xx_hal.h"
 #include "stm32f7xx_hal_gpio.h"
+#include "stm32f7xx_hal_tim.h"
 #include "tim.h"
 #include "usart.h"
 #include "usb_otg.h"
@@ -106,10 +108,53 @@ int main(void) {
 
   /* USER CODE END 2 */
 
+  // Code for the pre-charge relay
+  TIM1->CCR1 = 65535;
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+
+  /*
+   *   LSB
+   * 0 0 both relays are off
+   * 0 1 pre-charge relay is on
+   * 1 0 main contactor is on
+   * 1 1 invalid
+   */
+  uint8_t relay_states = 0;
+
   while (1) {
     /* USER CODE END WHILE */
+
+    switch (relay_states) {
+    case 0:
+      HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_1);
+
+      HAL_GPIO_WritePin(GPIOF, GPIO_PIN_13, GPIO_PIN_RESET);
+
+      HAL_Delay(5000);
+      relay_states = 1;
+      break;
+    case 1:
+      HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
+
+      HAL_GPIO_WritePin(GPIOF, GPIO_PIN_13, GPIO_PIN_RESET);
+
+      HAL_Delay(5000);
+      relay_states = 2;
+      break;
+    case 2:
+      HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_1);
+
+      HAL_GPIO_WritePin(GPIOF, GPIO_PIN_13, GPIO_PIN_SET);
+
+      HAL_Delay(5000);
+      relay_states = 0;
+      break;
+    default:
+      relay_states = 0;
+      break;
+      // printf("INVALID RELAY STATE");
+    }
 
     /* USER CODE BEGIN 3 */
   }
