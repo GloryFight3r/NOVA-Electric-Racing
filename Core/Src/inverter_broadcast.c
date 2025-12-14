@@ -2,7 +2,12 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-struct Internal_States Parse_Internal_States(uint8_t *arr) {
+struct Motor_Position_Information motor_position_information;
+struct Voltage_Information voltage_information;
+struct Internal_States internal_states;
+struct Fault_Codes fault_codes;
+
+void Parse_Internal_States(uint8_t *arr) {
   enum VSM_STATE vsm_state = arr[0];
 
   if (arr[0] == 14) {
@@ -90,34 +95,32 @@ struct Internal_States Parse_Internal_States(uint8_t *arr) {
 
   bool limit_stall_burst_model = (arr[7] & (1 << 7));
 
-  struct Internal_States internal_state = {
-      vsm_state,
-      pwm_frequency,
-      inv_state,
-      relay_state,
-      inverter_run_mode,
-      self_sensing_assist_enable,
-      active_discharge_state,
-      command_mode,
-      rolling_counter_value,
-      inverter_enable_state,
-      burst_model_mode,
-      start_mode_active,
-      inverter_enable_lockout,
-      direction_command,
-      bms_active,
-      bms_limiting_torque,
-      limit_max_speed,
-      limit_hot_spot,
-      low_speed_limit,
-      coolant_temp_limiting,
-      limit_stall_burst_model,
+  internal_states = (struct Internal_States){
+      .vsm_state = vsm_state,
+      .pwm_frequency = pwm_frequency,
+      .inverter_state = inv_state,
+      .relay_state = relay_state,
+      .run_mode = inverter_run_mode,
+      .self_sensing_assist_enable = self_sensing_assist_enable,
+      .discharge_state = active_discharge_state,
+      .command_mode = command_mode,
+      .rolling_counter_value = rolling_counter_value,
+      .inverter_enable_state = inverter_enable_state,
+      .burst_model_mode = burst_model_mode,
+      .start_mode_active = start_mode_active,
+      .inverter_enable_lockout = inverter_enable_lockout,
+      .direction_command = direction_command,
+      .bms_active = bms_active,
+      .bms_limiting_torque = bms_limiting_torque,
+      .limit_max_speed = limit_max_speed,
+      .limit_hot_spot = limit_hot_spot,
+      .low_speed_limiting = low_speed_limit,
+      .coolant_temperature_limiting = coolant_temp_limiting,
+      .limit_stall_burst_model = limit_stall_burst_model,
   };
-
-  return internal_state;
 }
 
-struct Fault_Codes Parse_Fault_Codes(uint8_t *arr) {
+void Parse_Fault_Codes(uint8_t *arr) {
   uint64_t fault_codes_as_uint64[8] = {0};
 
   // need to cast it into uint64_t in order to
@@ -132,16 +135,14 @@ struct Fault_Codes Parse_Fault_Codes(uint8_t *arr) {
        (fault_codes_as_uint64[4] << 32) | (fault_codes_as_uint64[5] << 40) |
        (fault_codes_as_uint64[6] << 48) | (fault_codes_as_uint64[7] << 56));
 
-  struct Fault_Codes fault_codes = {final_mask};
-
-  return fault_codes;
+  fault_codes = (struct Fault_Codes){.mask = final_mask};
 }
 
-size_t Check_Fault_Codes(struct Fault_Codes fault_codes,
-                         enum POSSIBLE_FAULTS *buff) {
+size_t Check_Fault_Codes(enum POSSIBLE_FAULTS *buff) {
   size_t k = 0;
+  struct Fault_Codes fault_codes_snapshot = fault_codes;
   for (int i = 0; i < 64; i++) {
-    if (fault_codes.mask & (((uint64_t)1) << i)) {
+    if (fault_codes_snapshot.mask & (((uint64_t)1) << i)) {
       buff[k++] = (enum POSSIBLE_FAULTS)(((uint64_t)1) << i);
     }
   }
@@ -149,8 +150,7 @@ size_t Check_Fault_Codes(struct Fault_Codes fault_codes,
   return k;
 }
 
-struct Motor_Position_Information
-Parse_Motor_Position_Information(uint8_t *arr) {
+void Parse_Motor_Position_Information(uint8_t *arr) {
 
   int16_t motor_angle = ((int16_t)arr[0]) | (((int16_t)arr[1]) << 8);
   int16_t motor_speed = ((int16_t)arr[2]) | (((int16_t)arr[3]) << 8);
@@ -158,28 +158,24 @@ Parse_Motor_Position_Information(uint8_t *arr) {
   int16_t delta_resolver_filtered =
       ((int16_t)arr[6]) | (((int16_t)arr[7]) << 8);
 
-  struct Motor_Position_Information motor_position_information = {
-      motor_angle,
-      motor_speed,
-      electrical_output_freq,
-      delta_resolver_filtered,
+  motor_position_information = (struct Motor_Position_Information){
+      .motor_angle = motor_angle,
+      .motor_speed = motor_speed,
+      .electrical_output_freq = electrical_output_freq,
+      .delta_resolver_filtered = delta_resolver_filtered,
   };
-
-  return motor_position_information;
 }
 
-struct Voltage_Information Parse_Voltage_Information(uint8_t *arr) {
+void Parse_Voltage_Information(uint8_t *arr) {
   int16_t dc_buc_voltage = ((int16_t)arr[0]) | (((int16_t)arr[1]) << 8);
   int16_t output_voltage = ((int16_t)arr[2]) | (((int16_t)arr[3]) << 8);
   int16_t vab_vd_voltage = ((int16_t)arr[4]) | (((int16_t)arr[5]) << 8);
   int16_t vbc_vq_voltage = ((int16_t)arr[6]) | (((int16_t)arr[7]) << 8);
 
-  struct Voltage_Information voltage_information = {
-      dc_buc_voltage,
-      output_voltage,
-      vab_vd_voltage,
-      vbc_vq_voltage,
+  voltage_information = (struct Voltage_Information){
+      .dc_bus_voltage = dc_buc_voltage,
+      .output_voltage = output_voltage,
+      .vab_vd_voltage = vab_vd_voltage,
+      .vbc_vq_voltage = vbc_vq_voltage,
   };
-
-  return voltage_information;
 }

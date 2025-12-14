@@ -18,6 +18,7 @@
  */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
+
 #include "can.h"
 #include "inverter_broadcast.h"
 #include "inverter_command.h"
@@ -161,18 +162,24 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan1) {
 
   switch (rxHeader.ExtId) {
   case 0x0AA:
-    struct Internal_States internal_states = Parse_Internal_States(buffTx);
+    Parse_Internal_States(buffTx);
     break;
   case 0x0AB:
-    struct Fault_Codes fault_codes = Parse_Fault_Codes(buffTx);
+    Parse_Fault_Codes(buffTx);
+
+    enum POSSIBLE_FAULTS possible_faults_buff[64] = {};
+    size_t err_size = Check_Fault_Codes(possible_faults_buff);
+    for (size_t i = 0; i < err_size; i++) {
+      printf("Error flag raised with id - %llu\n\r",
+             (unsigned long long)possible_faults_buff[i]);
+    }
+
     break;
   case 0x0A5:
-    struct Motor_Position_Information motor_position_information =
-        Parse_Motor_Position_Information(buffTx);
+    Parse_Motor_Position_Information(buffTx);
     break;
   case 0x0A7:
-    struct Voltage_Information voltage_information =
-        Parse_Voltage_Information(buffTx);
+    Parse_Voltage_Information(buffTx);
     break;
   case 0x0C2:
     uint16_t parameter_address = 0;

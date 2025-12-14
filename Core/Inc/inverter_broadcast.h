@@ -55,14 +55,14 @@ struct Voltage_Information {
    *
    * Format: High Voltage
    */
-  uint16_t dc_bus_voltage;
+  int16_t dc_bus_voltage;
 
   /*
    * The calculated value of the output voltage, in peak line-neutral volts.
    *
    * Format: High Voltage
    */
-  uint16_t output_voltage;
+  int16_t output_voltage;
 
   /*
    * Measured value of the voltage between Phase A and Phase B(VAB) when the
@@ -70,7 +70,7 @@ struct Voltage_Information {
    *
    * Format: High Voltage
    */
-  uint16_t vab_vd_voltage;
+  int16_t vab_vd_voltage;
 
   /*
    * Measured value of the voltage between Phase B and Phase C(VBC) when the
@@ -78,7 +78,7 @@ struct Voltage_Information {
    *
    * Format: High Voltage
    */
-  uint16_t vbc_vq_voltage;
+  int16_t vbc_vq_voltage;
 };
 
 enum VSM_STATE {
@@ -126,6 +126,8 @@ struct Internal_States {
   /*
    * FOR GEN5/CM THE PWM FREQUENCY THAT IS CURRENTLY BEING USED IS REPORTED.
    * For PMxxx inverters this value show as 0.
+   *
+   * Format
    */
   uint8_t pwm_frequency;
 
@@ -380,15 +382,20 @@ struct Torque_Capability {
   int8_t torque_capability;
 };
 
-struct Internal_States Parse_Internal_States(uint8_t *);
+void Parse_Internal_States(uint8_t *);
 
-struct Fault_Codes Parse_Fault_Codes(uint8_t *);
+void Parse_Fault_Codes(uint8_t *);
 
-size_t Check_Fault_Codes(struct Fault_Codes, enum POSSIBLE_FAULTS *);
+size_t Check_Fault_Codes(enum POSSIBLE_FAULTS *);
 
-struct Motor_Position_Information Parse_Motor_Position_Information(uint8_t *);
+void Parse_Motor_Position_Information(uint8_t *);
 
-struct Voltage_Information Parse_Voltage_Information(uint8_t *);
+void Parse_Voltage_Information(uint8_t *);
+
+extern struct Motor_Position_Information motor_position_information;
+extern struct Voltage_Information voltage_information;
+extern struct Internal_States internal_states;
+extern struct Fault_Codes fault_codes;
 
 #ifdef __cplusplus
 }
