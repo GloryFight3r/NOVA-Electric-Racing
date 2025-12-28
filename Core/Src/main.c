@@ -22,10 +22,14 @@
 #include "eth.h"
 #include "gpio.h"
 #include "stm32f767xx.h"
+#include "stm32f7xx_hal.h"
 #include "stm32f7xx_hal_gpio.h"
+#include "stm32f7xx_hal_tim.h"
 #include "tim.h"
 #include "usart.h"
 #include "usb_otg.h"
+
+#define RESOLVER_CALIBRATION
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -106,14 +110,20 @@ int main(void) {
 
   /* USER CODE END 2 */
 
-  /* Infinite loop */
-  /* USER CODE BEGIN WHILE */
-  while (1) {
-    /* USER CODE END WHILE */
+  // Set the duty cycle of the pre-charge relay
+  // TIM1->CCR1 = 65535;
 
+  /* USER CODE BEGIN WHILE */
+  // pre-charge the inverter
+
+#ifdef RESOLVER_CALIBRATION
+
+#else
+  while (1) {
     /* USER CODE BEGIN 3 */
+    /* USER CODE END 3 */
   }
-  /* USER CODE END 3 */
+#endif
 }
 
 /**

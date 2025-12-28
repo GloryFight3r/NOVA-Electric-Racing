@@ -18,8 +18,12 @@
  */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
+
 #include "can.h"
 #include "inverter_broadcast.h"
+#include "inverter_command.h"
+#include "stdio.h"
+#include "stm32f7xx_hal_can.h"
 
 /* USER CODE BEGIN 0 */
 
@@ -133,18 +137,17 @@ void CAN_Init_Interrupts() {
   }
 }
 
-void CAN_Send_Message() {
+void CAN_Send_Message(uint16_t address, uint8_t *message) {
   CAN_TxHeaderTypeDef txHeader;
   uint32_t canMailbox;
 
   txHeader.DLC = 8; // Number of bytes to be transmitted max- 8
   txHeader.IDE = CAN_ID_STD;
   txHeader.RTR = CAN_RTR_DATA;
-  txHeader.StdId = 0xC0;
-  txHeader.ExtId = 0x01;
+  txHeader.StdId = 0x00;
+  txHeader.ExtId = address;
   txHeader.TransmitGlobalTime = DISABLE;
 
-  uint8_t message[] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
   HAL_CAN_AddTxMessage(&hcan1, &txHeader, message, &canMailbox);
 }
 
@@ -156,14 +159,35 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan1) {
   if (HAL_CAN_GetRxMessage(hcan1, CAN_RX_FIFO0, &rxHeader, buffTx) != HAL_OK) {
     Error_Handler();
   }
-  // printf("Received a message\n\r");
-  if (rxHeader.ExtId == 0xAA) {
-    for (int i = 0; i < 8; i++) {
-      printf("%d ", buffTx[i]);
+
+  switch (rxHeader.ExtId) {
+  case 0x0AA:
+    Parse_Internal_States(buffTx);
+    break;
+  case 0x0AB:
+    Parse_Fault_Codes(buffTx);
+
+    enum POSSIBLE_FAULTS possible_faults_buff[64] = {};
+    size_t err_size = Check_Fault_Codes(possible_faults_buff);
+    for (size_t i = 0; i < err_size; i++) {
+      printf("Error flag raised with id - %llu\n\r",
+             (unsigned long long)possible_faults_buff[i]);
     }
 
-    printf("\n\r");
-    // TODO
+    break;
+  case 0x0A5:
+    Parse_Motor_Position_Information(buffTx);
+    break;
+  case 0x0A7:
+    Parse_Voltage_Information(buffTx);
+    break;
+  case 0x0C2:
+    uint16_t parameter_address = 0;
+    int16_t data = 0;
+    Parse_Parameter_Message(buffTx, &parameter_address, &data);
+    break;
+  default:
+    printf("Unknown broadcasted message extended id. Cannot parse!");
   }
 }
 /* USER CODE END 1 */

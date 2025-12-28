@@ -2,6 +2,7 @@
 #define __INV_BROADCAST__
 
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
 #ifdef __cplusplus
 extern "C" {
@@ -9,7 +10,76 @@ extern "C" {
 
 /* Includes ------------------------------------------------------------------*/
 
-void Parse_Internal_States(uint8_t *);
+/*
+ * 0x0A5
+ */
+struct Motor_Position_Information {
+  /*
+   * The electrical angle of the motor as read
+   * by the encoder or resolver.
+   *
+   * Format: Angle.
+   */
+  int16_t motor_angle;
+
+  /*
+   * The measured speed of the motor.
+   *
+   * Format: Angular Velocity.
+   */
+  int16_t motor_speed;
+
+  /*
+   * The actual electrical frequency of the ivnerter.
+   *
+   * Format: Frequency
+   */
+  int16_t electrical_output_freq;
+
+  /*
+   * This is used in calibration of resolver angle adjustment.
+   * The range of this parameter is +-180 degrees. Values between
+   * 180degrees and 360degrees are shown as negative angle.
+   * For example 270 degrees is equal to -90 degrees, and
+   * 190 degrees is equal to -170 degrees.
+   */
+  int16_t delta_resolver_filtered;
+};
+
+/*
+ * 0x0A7
+ */
+struct Voltage_Information {
+  /*
+   * The actual measured value of the DC bus voltage.
+   *
+   * Format: High Voltage
+   */
+  int16_t dc_bus_voltage;
+
+  /*
+   * The calculated value of the output voltage, in peak line-neutral volts.
+   *
+   * Format: High Voltage
+   */
+  int16_t output_voltage;
+
+  /*
+   * Measured value of the voltage between Phase A and Phase B(VAB) when the
+   * inverter is disabled. Vd voltage when the inverter is enabled.
+   *
+   * Format: High Voltage
+   */
+  int16_t vab_vd_voltage;
+
+  /*
+   * Measured value of the voltage between Phase B and Phase C(VBC) when the
+   * inverter is disabled. Vq voltage when the inverted is enabled.
+   *
+   * Format: High Voltage
+   */
+  int16_t vbc_vq_voltage;
+};
 
 enum VSM_STATE {
   VSM_START_STATE,
@@ -56,6 +126,8 @@ struct Internal_States {
   /*
    * FOR GEN5/CM THE PWM FREQUENCY THAT IS CURRENTLY BEING USED IS REPORTED.
    * For PMxxx inverters this value show as 0.
+   *
+   * Format
    */
   uint8_t pwm_frequency;
 
@@ -165,7 +237,8 @@ struct Internal_States {
   bool limit_stall_burst_model;
 };
 
-enum POST_FAULTS {
+enum POSSIBLE_FAULTS {
+  // POST FAULTS
   ERR_POST_HARDWARE_GATE_DESATURATION = 1ULL << 0,
   ERR_HW_OVER_CURRENT = 1ULL << 1,
   ERR_ACCELERATION_SHORTED = 1ULL << 2,
@@ -196,9 +269,8 @@ enum POST_FAULTS {
   ERR_HARDWARE_DC_BUS_OVER_VOLTAGE_DURING_INITIALIZATION = 1ULL << 27,
   ERR_BRAKE_SHORTED = 1ULL << 30,
   ERR_BRAKE_OPEN = 1ULL << 31,
-};
 
-enum RUN_FAULTS {
+  // RUN FAULTS
   ERR_MOTOR_OVER_SPEED = 1ULL << 32,
   ERR_OVER_CURRENT = 1ULL << 33,
   ERR_OVER_VOLTAGE = 1ULL << 34,
@@ -309,6 +381,21 @@ struct Torque_Capability {
    */
   int8_t torque_capability;
 };
+
+void Parse_Internal_States(uint8_t *);
+
+void Parse_Fault_Codes(uint8_t *);
+
+size_t Check_Fault_Codes(enum POSSIBLE_FAULTS *);
+
+void Parse_Motor_Position_Information(uint8_t *);
+
+void Parse_Voltage_Information(uint8_t *);
+
+extern struct Motor_Position_Information motor_position_information;
+extern struct Voltage_Information voltage_information;
+extern struct Internal_States internal_states;
+extern struct Fault_Codes fault_codes;
 
 #ifdef __cplusplus
 }
