@@ -11,6 +11,13 @@ enum VSM_STATE ecu_vsm_state = VSM_UNKNOWN_STATE;
 void Walk_Through_Precharge() {
   struct Internal_States internal_states_snapshot = internal_states;
 
+  /*
+   * SW USER MANUAL, Page 28
+   *
+   * NOTE: It is possible to send a command to the inverter to enable the relay
+   * contactors using CAN messages. That way we can get 12V power driver,
+   * instead of relying on MOSFET drivers
+   */
   switch (internal_states_snapshot.vsm_state) {
   case VSM_START_STATE:
     if (ecu_vsm_state == VSM_START_STATE) {
@@ -22,24 +29,42 @@ void Walk_Through_Precharge() {
 
     break;
   case VSM_PRE_CHARGE_INIT_STATE:
-    // turn on the pre-charge relay
-    HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
+    /*
+     * Performs VDC checks and if the voltage is under the threshold,
+     * transition to VSM_PRE_CHARGE_ACTIVE_STATE
+     */
     break;
   case VSM_PRE_CHARGE_ACTIVE_STATE:
-    HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
-    HAL_GPIO_WritePin(GPIOF, GPIO_PIN_13, GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(
+        GPIOF, GPIO_PIN_13,
+        GPIO_PIN_RESET); // turn off the main circuit relay, just in case
+    HAL_TIM_PWM_Start(&htim1,
+                      TIM_CHANNEL_1); // activate the pre-charge circuit relay
 
     break;
   case VSM_PRE_CHARGE_COMPLETE_STATE:
-    HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_1);
-    HAL_GPIO_WritePin(GPIOF, GPIO_PIN_13, GPIO_PIN_SET);
-
+    HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_1); // de-activate the pre-charge relay
+    HAL_GPIO_WritePin(GPIOF, GPIO_PIN_13,
+                      GPIO_PIN_SET); // turn on the main circuit relay
+    /*
+     * also preforms stability check on the voltage. Once checks are completed
+     * transition to VSM_WAIT_STATE
+     */
     break;
   case VSM_WAIT_STATE:
-    // choose either FORWARD or REVERSE mode
-
+    /*
+     * NOTE: Inv_Cmd_Mode_EEPROM should be set to 0 for CAN mode communication.
+     * This ensures that the inverter is not relying on BRAKE, FORWARD and
+     * REVERSE SWITCHES.
+     *
+     * NOTE: Furthermore, Key_Switch_Mode is ineffective in CAN mode, so this
+     * whole state should quickly transition to VSM_READY_STATE
+     */
     break;
   case VSM_READY_STATE:
+    /*
+     * The system is waiting for Enable Inverter Command,
+     */
     break;
   case VSM_MOTOR_RUNNING_STATE:
     break;

@@ -160,6 +160,7 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan1) {
     Error_Handler();
   }
 
+  // TODO replace hex bytes with enum values
   switch (rxHeader.ExtId) {
   case 0x0AA:
     Parse_Internal_States(buffTx);
