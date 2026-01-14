@@ -5,6 +5,8 @@
 
 extern VSM_STATE ecu_vsm_state;
 
-void Walk_Through_Precharge(void);
+void Pulse_Command();
+
+void State_Transition();
 
 #endif

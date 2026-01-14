@@ -9,5 +9,5 @@ project(nova_app)
 target_include_directories(app PUBLIC "include/")
 
 target_sources(
-  app PRIVATE src/main.cpp src/inverter_broadcast.cpp src/pre_charge.cpp
+  app PRIVATE src/main.cpp src/inverter_broadcast.cpp src/can_utility.cpp
               src/inverter_command.cpp src/can_controller.cpp)

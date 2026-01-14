@@ -1,4 +1,5 @@
 #include "inverter_command.hpp"
+#include "can_controller.hpp"
 
 #include <cstdint>
 
@@ -24,8 +25,7 @@ void Send_Command(int16_t torque_command, int16_t speed_command,
   constructed_message[6] = commanded_torque_limit & ((1 << 8) - 1);
   constructed_message[7] = commanded_torque_limit >> 8;
 
-  // TODO: Send a can message
-  // CAN_Send_Message(0x0C0, constructed_message);
+  CAN_Send_Message(0x0C0, constructed_message);
 }
 
 /*
@@ -44,8 +44,7 @@ void Send_Parameter(uint16_t parameter_address, bool rw, int16_t data) {
   constructed_message[4] = data & ((1 << 8) - 1);
   constructed_message[5] = data >> 8;
 
-  // TODO: Send a can message
-  // CAN_Send_Message(0x0C1, constructed_message);
+  CAN_Send_Message(0x0C1, constructed_message);
 }
 
 void Parse_Parameter_Message(uint8_t *arr, uint16_t *parameter_address,

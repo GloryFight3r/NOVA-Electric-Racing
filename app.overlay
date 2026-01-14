@@ -1,6 +1,43 @@
+#include <dt-bindings/pwm/pwm.h>
+
+
 &can1 {
   status = "okay";
   pinctrl-0 = <&can1_rx_pa11 &can1_tx_pa12>;
   bus-speed = <250000>; // default baud rate of the inverter
   pinctrl-names = "default";
+};
+
+/ {
+  chosen {
+    zephyr,console = &cdc_acm_uart0;
+  };
+
+  aliases {
+    mypwm = &pwm_precharge_relay;
+  };
+
+  pwmled {
+    compatible = "pwm-leds";
+    status = "okay";
+    pwm_precharge_relay: pwm_precharge {
+      pwms = <&pwm14 1 PWM_MSEC(20) PWM_POLARITY_NORMAL>;
+    };
+  };
+};
+
+&timers14 {
+  status="okay";
+
+  pwm14: pwm {
+    status = "okay";
+    pinctrl-0 = <&tim14_ch1_pa7>;
+    pinctrl-names = "default";
+  };
+};
+
+&zephyr_udc0 {
+	cdc_acm_uart0: cdc_acm_uart0 {
+		compatible = "zephyr,cdc-acm-uart";
+	};
 };

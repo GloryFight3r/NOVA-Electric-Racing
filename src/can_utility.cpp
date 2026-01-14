@@ -1,9 +1,17 @@
-#include "pre_charge.hpp"
+#include "can_utility.hpp"
 #include "inverter_broadcast.hpp"
+#include "inverter_command.hpp"
+#include "zephyr/kernel.h"
+
+K_SEM_DEFINE(pulse_sem, 0, 1);
+
+void pulse_timer_expiratory_func(k_timer *timer_id) { k_sem_give(&pulse_sem); }
+
+K_TIMER_DEFINE(pulse_timer, pulse_timer_expiratory_func, NULL);
 
 VSM_STATE ecu_vsm_state = VSM_STATE::VSM_UNKNOWN_STATE;
 
-void Walk_Through_Precharge() {
+void State_Transition() {
   Internal_States internal_states_snapshot = internal_states;
 
   /*
@@ -15,9 +23,6 @@ void Walk_Through_Precharge() {
    */
   switch (internal_states_snapshot.vsm_state) {
   case VSM_STATE::VSM_START_STATE:
-    if (ecu_vsm_state == VSM_STATE::VSM_START_STATE) {
-      break;
-    }
 
     // HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_1);
     // HAL_GPIO_WritePin(GPIOF, GPIO_PIN_13, GPIO_PIN_RESET);
@@ -82,4 +87,12 @@ void Walk_Through_Precharge() {
   }
 
   ecu_vsm_state = internal_states_snapshot.vsm_state;
+}
+
+void Pulse_Command() {
+  while (true) {
+    k_sem_take(&pulse_sem, K_FOREVER);
+
+    Send_Command(10, 0, 1, 1, 0, 0, 0);
+  }
 }
