@@ -1,0 +1,6 @@
+&can1 {
+  status = "okay";
+  pinctrl-0 = <&can1_rx_pa11 &can1_tx_pa12>;
+  bus-speed = <250000>; // default baud rate of the inverter
+  pinctrl-names = "default";
+};
