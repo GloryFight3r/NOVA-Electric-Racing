@@ -1,5 +1,4 @@
-#include <dt-bindings/pwm/pwm.h>
-
+#include <zephyr/dt-bindings/pwm/pwm.h>
 
 &can1 {
   status = "okay";
@@ -8,36 +7,43 @@
   pinctrl-names = "default";
 };
 
-/ {
-  chosen {
-    zephyr,console = &cdc_acm_uart0;
-  };
-
-  aliases {
-    mypwm = &pwm_precharge_relay;
-  };
-
-  pwmled {
-    compatible = "pwm-leds";
+&timers2 {
+  st,prescaler = <1000>;
+  status = "okay";
+  pwm2: pwm {
     status = "okay";
-    pwm_precharge_relay: pwm_precharge {
-      pwms = <&pwm14 1 PWM_MSEC(20) PWM_POLARITY_NORMAL>;
-    };
-  };
-};
-
-&timers14 {
-  status="okay";
-
-  pwm14: pwm {
-    status = "okay";
-    pinctrl-0 = <&tim14_ch1_pa7>;
+    pinctrl-0 = <&tim2_ch1_pa0>;
     pinctrl-names = "default";
   };
 };
 
-&zephyr_udc0 {
-	cdc_acm_uart0: cdc_acm_uart0 {
-		compatible = "zephyr,cdc-acm-uart";
-	};
+/ {
+  chosen {
+    zephyr,console = &usart3;
+  };
+  aliases {
+    precharge-relay = &precharge_relay;
+    main-relay = &relay;
+  };
+  pwmleds {
+    compatible = "pwm-leds";
+    status = "okay";
+
+    precharge_relay: precharge_relay {
+      pwms = <&pwm2 1 PWM_MSEC(40) PWM_POLARITY_NORMAL>;
+      label = "PWM-LED2";
+    };
+  };
+  relay_input {
+    compatible = "gpio-keys";
+    relay: main_relay {
+      gpios = <&gpioe 14 GPIO_ACTIVE_LOW>;
+    };
+  };
+};
+
+&usart3 {
+	status = "okay";
+	pinctrl-0 = <&usart3_tx_pd8 &usart3_rx_pd9>;
+	pinctrl-names = "default";
 };

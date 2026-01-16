@@ -1,6 +1,7 @@
 #include "can_utility.hpp"
 #include "inverter_broadcast.hpp"
 #include "inverter_command.hpp"
+#include "relay_controller.hpp"
 #include "zephyr/kernel.h"
 
 K_SEM_DEFINE(pulse_sem, 0, 1);
@@ -23,6 +24,8 @@ void State_Transition() {
    */
   switch (internal_states_snapshot.vsm_state) {
   case VSM_STATE::VSM_START_STATE:
+    disableMainRelay();
+    disablePrechargeRelay();
 
     // HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_1);
     // HAL_GPIO_WritePin(GPIOF, GPIO_PIN_13, GPIO_PIN_RESET);
@@ -33,14 +36,13 @@ void State_Transition() {
      * Performs VDC checks and if the voltage is under the threshold,
      * transition to VSM_PRE_CHARGE_ACTIVE_STATE
      */
+    disableMainRelay();
+    disablePrechargeRelay();
+
     break;
   case VSM_STATE::VSM_PRE_CHARGE_ACTIVE_STATE:
-    // HAL_GPIO_WritePin(
-    //     GPIOF, GPIO_PIN_13,
-    //     GPIO_PIN_RESET); // turn off the main circuit relay, just in case
-    // HAL_TIM_PWM_Start(&htim1,
-    //                   TIM_CHANNEL_1); // activate the pre-charge circuit
-    //                   relay
+    disableMainRelay();
+    enablePrechargeRelay();
 
     break;
   case VSM_STATE::VSM_PRE_CHARGE_COMPLETE_STATE:
@@ -51,6 +53,9 @@ void State_Transition() {
      * also preforms stability check on the voltage. Once
      * checks are completed transition to VSM_WAIT_STATE
      */
+    disablePrechargeRelay();
+    enableMainRelay();
+
     break;
   case VSM_STATE::VSM_WAIT_STATE:
     /*
@@ -77,13 +82,14 @@ void State_Transition() {
   case VSM_STATE::VSM_SHUTDOWN_IN_PROCESS:
     // HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_1);
     // HAL_GPIO_WritePin(GPIOF, GPIO_PIN_13, GPIO_PIN_RESET);
+    disablePrechargeRelay();
+    disableMainRelay();
 
     break;
   case VSM_STATE::VSM_RECYCLE_POWER_STATE:
     break;
   default:
     break;
-    // printf("Unknown vsm state!\n\r");
   }
 
   ecu_vsm_state = internal_states_snapshot.vsm_state;
