@@ -1,6 +1,99 @@
+#include <zephyr/dt-bindings/pwm/pwm.h>
+
 &can1 {
   status = "okay";
   pinctrl-0 = <&can1_rx_pa11 &can1_tx_pa12>;
   bus-speed = <250000>; // default baud rate of the inverter
   pinctrl-names = "default";
+};
+
+&timers2 {
+  st,prescaler = <1000>;
+  status = "okay";
+  pwm2: pwm {
+    status = "okay";
+    pinctrl-0 = <&tim2_ch1_pa0>; // D32 -- PA0
+    pinctrl-names = "default";
+  };
+};
+
+/ {
+  chosen {
+    zephyr,console = &usart3;
+  };
+
+  aliases {
+    precharge-relay = &precharge_relay;
+    
+    faults-led = &faults_led;
+    
+    main-relay = &relay;
+    rotary-encoder = &rotary_encoder;
+
+    inv-en-sw = &inverter_enable_sw;
+    speed-mode-sw = &speed_mode_sw;
+    faults-clear-sw = &faults_clear_sw;
+  };
+
+  leds {
+    compatible = "gpio-leds";
+
+    faults_led: faults_led {
+      gpios = <&gpioe 12 GPIO_ACTIVE_HIGH>; // D39 -- PE12
+    };
+  };
+
+  pwmleds {
+    compatible = "pwm-leds";
+    status = "okay";
+
+    precharge_relay: precharge_relay {
+      pwms = <&pwm2 1 PWM_MSEC(40) PWM_POLARITY_NORMAL>;
+      label = "PWM-LED2";
+    };
+  };
+
+  relay_input {
+    compatible = "gpio-keys";
+    relay: main_relay {
+      gpios = <&gpioe 14 GPIO_ACTIVE_HIGH>; // D38 -- PE14
+      zephyr,code = <INPUT_KEY_0>;
+    };
+  };
+
+  buttons {
+    compatible = "gpio-keys";
+
+    inverter_enable_sw: inv_en_sw {
+      gpios = <&gpiob 2 (GPIO_PULL_UP | GPIO_ACTIVE_LOW)>; // D27 -- PB2
+      zephyr,code = <INPUT_KEY_1>;
+    };
+    speed_mode_sw: speed_mode_sw {
+      gpios = <&gpiof 15 (GPIO_PULL_UP | GPIO_ACTIVE_LOW)>; // D2 -- PF15
+      zephyr,code = <INPUT_KEY_2>;
+    };
+    faults_clear_sw: faults_clear_sw {
+      gpios = <&gpiof 4 (GPIO_PULL_UP | GPIO_ACTIVE_LOW)>; // A8 -- PF4
+      zephyr,code = <INPUT_KEY_3>;
+    };
+  };
+
+  rotary_encoder: qdec {
+    compatible = "gpio-qdec";
+
+    status = "okay";
+    
+    gpios = <&gpiob 10 (GPIO_PULL_UP | GPIO_ACTIVE_HIGH)>, // D36 -- PB10
+            <&gpiob 11 (GPIO_PULL_UP | GPIO_ACTIVE_HIGH)>; // D35 -- PB11
+    steps-per-period = <4>;
+    zephyr,axis = <INPUT_REL_WHEEL>;
+    sample-time-us = <2000>;
+    idle-timeout-ms = <200>;
+  };
+};
+
+&usart3 {
+	status = "okay";
+	pinctrl-0 = <&usart3_tx_pd8 &usart3_rx_pd9>;
+	pinctrl-names = "default";
 };

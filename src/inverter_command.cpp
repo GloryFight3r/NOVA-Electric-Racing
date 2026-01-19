@@ -1,4 +1,6 @@
 #include "inverter_command.hpp"
+#include "can_controller.hpp"
+#include "zephyr/sys/printk.h"
 
 #include <cstdint>
 
@@ -7,7 +9,7 @@ void Send_Command(int16_t torque_command, int16_t speed_command,
                   bool inverter_discharge, bool speed_mode_enable,
                   int16_t commanded_torque_limit) {
 
-  uint8_t constructed_message[8] = {0};
+  uint8_t constructed_message[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 
   constructed_message[0] = torque_command & ((1 << 8) - 1);
   constructed_message[1] = torque_command >> 8;
@@ -24,8 +26,7 @@ void Send_Command(int16_t torque_command, int16_t speed_command,
   constructed_message[6] = commanded_torque_limit & ((1 << 8) - 1);
   constructed_message[7] = commanded_torque_limit >> 8;
 
-  // TODO: Send a can message
-  // CAN_Send_Message(0x0C0, constructed_message);
+  CAN_Send_Message(0x0C0, constructed_message);
 }
 
 /*
@@ -34,7 +35,7 @@ void Send_Command(int16_t torque_command, int16_t speed_command,
  * page 38 of CAN Protocol document
  */
 void Send_Parameter(uint16_t parameter_address, bool rw, int16_t data) {
-  uint8_t constructed_message[8] = {0};
+  uint8_t constructed_message[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 
   constructed_message[0] = parameter_address & ((1 << 8) - 1);
   constructed_message[1] = parameter_address >> 8;
@@ -44,8 +45,7 @@ void Send_Parameter(uint16_t parameter_address, bool rw, int16_t data) {
   constructed_message[4] = data & ((1 << 8) - 1);
   constructed_message[5] = data >> 8;
 
-  // TODO: Send a can message
-  // CAN_Send_Message(0x0C1, constructed_message);
+  CAN_Send_Message(0x0C1, constructed_message);
 }
 
 void Parse_Parameter_Message(uint8_t *arr, uint16_t *parameter_address,
