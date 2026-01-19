@@ -1,5 +1,5 @@
-#ifndef __INV_BROADCAST__
-#define __INV_BROADCAST__
+#ifndef INVERTER_BROADCAST_PARSE_H
+#define INVERTER_BROADCAST_PARSE_H
 
 #include <stdbool.h>
 #include <stddef.h>
@@ -394,4 +394,4 @@ extern Voltage_Information voltage_information;
 extern Internal_States internal_states;
 extern Fault_Codes fault_codes;
 
-#endif /* __INV_BROADCAST__ */
+#endif /* INVERTER_BROADCAST_PARSE_H */

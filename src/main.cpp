@@ -10,7 +10,15 @@
 
 const int32_t STACK_SIZE = 2048;
 
+//-------------------------------------------------------------------------------------------------------------------------
+
+/*
+ * Debug definitions
+ */
+
 // #define RELAYS_DEBUG
+
+//-------------------------------------------------------------------------------------------------------------------------
 
 // thread responsible for receiving can messages
 K_THREAD_DEFINE(can_thread_id, STACK_SIZE, CAN_Parse_Thread, nullptr, nullptr,

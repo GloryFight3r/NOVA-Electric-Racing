@@ -10,6 +10,6 @@ target_include_directories(app PUBLIC "include/")
 
 target_sources(
   app
-  PRIVATE src/main.cpp src/inverter_broadcast.cpp src/can_utility.cpp
+  PRIVATE src/main.cpp src/inverter_broadcast_parse.cpp src/can_utility.cpp
           src/inverter_command.cpp src/can_controller.cpp
           src/peripheral_controller.cpp)

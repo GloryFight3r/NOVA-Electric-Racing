@@ -5,7 +5,6 @@
 #include "zephyr/devicetree.h"
 #include "zephyr/drivers/pwm.h"
 #include "zephyr/dt-bindings/gpio/gpio.h"
-#include "zephyr/dt-bindings/pwm/pwm.h"
 #include "zephyr/kernel.h"
 #include "zephyr/sys/util.h"
 #include <zephyr/input/input.h>

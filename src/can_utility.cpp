@@ -1,5 +1,5 @@
 #include "can_utility.hpp"
-#include "inverter_broadcast.hpp"
+#include "inverter_broadcast_parse.hpp"
 #include "inverter_command.hpp"
 #include "peripheral_controller.hpp"
 #include "zephyr/kernel.h"

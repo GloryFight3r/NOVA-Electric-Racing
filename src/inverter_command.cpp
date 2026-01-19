@@ -1,6 +1,5 @@
 #include "inverter_command.hpp"
 #include "can_controller.hpp"
-#include "zephyr/sys/printk.h"
 
 #include <cstdint>
 
