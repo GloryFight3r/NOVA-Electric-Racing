@@ -130,11 +130,10 @@ void Pulse_Command() {
     printk("%d %d %d\n", pulse_message.torque, pulse_message.speed,
            pulse_message.inverter_enable);
 
-    /*Send_Command(pulse_message.torque, pulse_message.speed,
+    Send_Command(pulse_message.torque, pulse_message.speed,
                  pulse_message.direction, pulse_message.inverter_enable,
                  pulse_message.inverter_discharge,
                  pulse_message.speed_mode_enable, pulse_message.torque_limit);
-    */
   }
 }
 

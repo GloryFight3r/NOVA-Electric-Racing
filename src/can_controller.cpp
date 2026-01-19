@@ -78,6 +78,7 @@ void rx_callback_function(const device *dev, can_frame *frame,
                frame->data[4], frame->data[5], frame->data[6], frame->data[7]}};
 
   k_msgq_put(&can_rx_q, &item, K_FOREVER);
+  printk("HEREE!\n");
 }
 
 int32_t CAN_Initialize() {
@@ -87,7 +88,7 @@ int32_t CAN_Initialize() {
     return -1;
   }
 
-  const can_filter my_filter = {.id = 0, .mask = 0, .flags = 0};
+  const can_filter my_filter = {.id = 0, .mask = CAN_STD_ID_MASK, .flags = 0};
 
   can_add_rx_filter(can_dev, rx_callback_function, nullptr, &my_filter);
 
