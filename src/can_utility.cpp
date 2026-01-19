@@ -127,8 +127,8 @@ void Pulse_Command() {
 
   while (true) {
     k_sem_take(&pulse_sem, K_FOREVER);
-    printk("%d %d %d\n", pulse_message.torque, pulse_message.speed,
-           pulse_message.inverter_enable);
+    printk("%d %d %d %d\n", pulse_message.torque, pulse_message.speed,
+           pulse_message.inverter_enable, pulse_message.inverter_discharge);
 
     Send_Command(pulse_message.torque, pulse_message.speed,
                  pulse_message.direction, pulse_message.inverter_enable,

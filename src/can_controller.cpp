@@ -70,7 +70,7 @@ void CAN_Parse_Thread(void *p1, void *p2, void *p3) {
  * Receive CAN messages from the inverter and enqueue them in the parser's
  * queue.
  */
-void rx_callback_function(const device *dev, can_frame *frame,
+void rx_callback_function(const struct device *dev, struct can_frame *frame,
                           void *user_data) {
   can_rx_item item = can_rx_item{
       .msg_id = frame->id,
@@ -78,17 +78,26 @@ void rx_callback_function(const device *dev, can_frame *frame,
                frame->data[4], frame->data[5], frame->data[6], frame->data[7]}};
 
   k_msgq_put(&can_rx_q, &item, K_FOREVER);
-  printk("HEREE!\n");
 }
 
 int32_t CAN_Initialize() {
 
   if (!device_is_ready(can_dev)) {
-    printk("CAN device is not ready!");
+    printk("CAN device is not ready!\n");
     return -1;
   }
 
-  const can_filter my_filter = {.id = 0, .mask = CAN_STD_ID_MASK, .flags = 0};
+  if (can_set_mode(can_dev, CAN_MODE_LOOPBACK) != 0) {
+    printk("Error setting CAN mode!\n");
+    return -1;
+  }
+
+  if (can_start(can_dev) != 0) {
+    printk("Couldn't start CAN device\n");
+    return -1;
+  }
+
+  const can_filter my_filter = {.id = 0, .mask = 0, .flags = CAN_FILTER_IDE};
 
   can_add_rx_filter(can_dev, rx_callback_function, nullptr, &my_filter);
 
@@ -99,7 +108,7 @@ void CAN_Send_Message(uint16_t address, uint8_t message[]) {
   struct can_frame frame = {
       .id = address,
       .dlc = 8,
-      .flags = 0,
+      .flags = CAN_FRAME_IDE,
       .data = {message[0], message[1], message[2], message[3], message[4],
                message[5], message[6], message[7]},
   };

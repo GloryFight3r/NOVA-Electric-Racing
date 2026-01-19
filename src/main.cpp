@@ -10,6 +10,8 @@
 
 const int32_t STACK_SIZE = 2048;
 
+// #define RELAYS_DEBUG
+
 // thread responsible for receiving can messages
 K_THREAD_DEFINE(can_thread_id, STACK_SIZE, CAN_Parse_Thread, nullptr, nullptr,
                 nullptr, 3, 0, 0);
@@ -28,7 +30,20 @@ int main() {
   }
 
   while (true) {
-    k_sleep(K_FOREVER);
+#ifdef RELAYS_DEBUG
+    enablePrechargeRelay();
+    k_sleep(K_MSEC(1500));
+
+    disablePrechargeRelay();
+
+    k_sleep(K_MSEC(1500));
+
+    enableMainRelay();
+    k_sleep(K_MSEC(1500));
+
+    disableMainRelay();
+    k_sleep(K_MSEC(1500));
+#endif
   }
 
   return 0;

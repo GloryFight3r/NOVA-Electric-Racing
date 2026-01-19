@@ -33,6 +33,7 @@
     inv-en-sw = &inverter_enable_sw;
     speed-mode-sw = &speed_mode_sw;
     faults-clear-sw = &faults_clear_sw;
+    discharge-sw = &discharge_sw;
   };
 
   leds {
@@ -75,6 +76,11 @@
     faults_clear_sw: faults_clear_sw {
       gpios = <&gpiof 4 (GPIO_PULL_UP | GPIO_ACTIVE_LOW)>; // A8 -- PF4
       zephyr,code = <INPUT_KEY_3>;
+    };
+
+    discharge_sw: discharge_sw {
+      gpios = <&gpioe 0 (GPIO_PULL_UP | GPIO_ACTIVE_LOW)>; // D34 -- PE0
+      zephyr,code = <INPUT_KEY_2>;
     };
   };
 

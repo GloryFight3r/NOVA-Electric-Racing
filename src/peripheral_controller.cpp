@@ -44,18 +44,23 @@ static const gpio_dt_spec speed_mode_switch =
 static const gpio_dt_spec faults_clear_sw =
     GPIO_DT_SPEC_GET(DT_ALIAS(faults_clear_sw), gpios);
 
-static const int32_t GPIO_INPUT_CNT = 3;
+static const gpio_dt_spec discharge_clear_sw =
+    GPIO_DT_SPEC_GET(DT_ALIAS(discharge_sw), gpios);
+
+static const int32_t GPIO_INPUT_CNT = 4;
 static const gpio_dt_spec *gpio_input_devices[GPIO_INPUT_CNT] = {
-    &inverter_enable_switch, &speed_mode_switch, &faults_clear_sw};
+    &inverter_enable_switch, &speed_mode_switch, &faults_clear_sw,
+    &discharge_clear_sw};
 
 // ---------------------------------------------------------
 
 gpio_callback inv_switch_cb;
 gpio_callback speedmode_switch_cb;
 gpio_callback faults_clear_cb;
+gpio_callback discharge_cb;
 
 gpio_callback *switch_callbacks[GPIO_INPUT_CNT] = {
-    &inv_switch_cb, &speedmode_switch_cb, &faults_clear_cb};
+    &inv_switch_cb, &speedmode_switch_cb, &faults_clear_cb, &discharge_cb};
 
 // ---------------------------------------------------------
 
@@ -100,10 +105,25 @@ void faults_clear_isr(const struct device *dev, struct gpio_callback *cb,
 
 // ---------------------------------------------------------
 
+void discharge_switch_handler(struct k_work *work) {
+  pulse_message.inverter_discharge ^= 1;
+}
+
+static K_WORK_DELAYABLE_DEFINE(discharge_switch_worker,
+                               discharge_switch_handler);
+
+void discharge_switch_isr(const struct device *dev, struct gpio_callback *cb,
+                          uint32_t pins) {
+
+  k_work_reschedule(&discharge_switch_worker, K_MSEC(300));
+}
+
+// ---------------------------------------------------------
+
 typedef void (*isr_t)(const struct device *, struct gpio_callback *, uint32_t);
 
 static isr_t all_isrs[] = {inv_switch_isr, speedmode_switch_isr,
-                           faults_clear_isr};
+                           faults_clear_isr, discharge_switch_isr};
 
 // ---------------------------------------------------------
 
@@ -151,11 +171,11 @@ int32_t initPeripherals() {
 // ---------------------------------------------------------
 
 void enablePrechargeRelay() {
-  pwm_set_dt(&pre_charge_relay_pwm, PWM_MSEC(40), PWM_MSEC(30));
+  pwm_set_dt(&pre_charge_relay_pwm, PWM_PERIOD, PWM_DUTY_PERIOD);
 }
 
 void disablePrechargeRelay() {
-  pwm_set_dt(&pre_charge_relay_pwm, PWM_MSEC(40), 0);
+  pwm_set_dt(&pre_charge_relay_pwm, PWM_PERIOD, 0);
 }
 
 // ---------------------------------------------------------
@@ -176,8 +196,9 @@ static void qdec_cb(struct input_event *evt, void *user_data) {
     pulse_message.speed =
         MAX(MIN(pulse_message.speed + evt->value, MAX_SPEED), 0);
   } else {
-    pulse_message.torque =
-        MAX(MIN(pulse_message.torque + evt->value, MAX_TORQUE), 0);
+    pulse_message.torque = MAX(
+        MIN(pulse_message.torque + (TORQUE_SCALER * evt->value), MAX_TORQUE),
+        0);
   }
 }
 
