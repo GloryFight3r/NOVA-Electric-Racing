@@ -12,4 +12,4 @@ target_sources(
   app
   PRIVATE src/main.cpp src/inverter_broadcast.cpp src/can_utility.cpp
           src/inverter_command.cpp src/can_controller.cpp
-          src/relay_controller.cpp)
+          src/peripheral_controller.cpp)

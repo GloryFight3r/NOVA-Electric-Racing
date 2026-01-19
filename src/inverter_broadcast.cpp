@@ -1,4 +1,5 @@
 #include "inverter_broadcast.hpp"
+#include "can_controller.hpp"
 #include <stdbool.h>
 #include <stddef.h>
 
@@ -7,7 +8,7 @@ Voltage_Information voltage_information;
 Internal_States internal_states;
 Fault_Codes fault_codes;
 
-void Parse_Internal_States(uint8_t *arr) {
+Internal_States Parse_Internal_States(uint8_t *arr) {
   VSM_STATE vsm_state = static_cast<VSM_STATE>(arr[0]);
 
   uint8_t pwm_frequency = arr[1];
@@ -111,10 +112,11 @@ void Parse_Internal_States(uint8_t *arr) {
       .coolant_temperature_limiting = coolant_temp_limiting,
       .limit_stall_burst_model = limit_stall_burst_model,
   };
+  return internal_states;
 }
 
 void Parse_Fault_Codes(uint8_t *arr) {
-  uint64_t fault_codes_as_uint64[8] = {0};
+  uint64_t fault_codes_as_uint64[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 
   // need to cast it into uint64_t in order to
   // make the bit shifts with width >= 8
@@ -131,16 +133,16 @@ void Parse_Fault_Codes(uint8_t *arr) {
   fault_codes = Fault_Codes{.mask = final_mask};
 }
 
-size_t Check_Fault_Codes(POSSIBLE_FAULTS *buff) {
-  size_t k = 0;
+size_t Check_Fault_Codes() {
+  faults_buffer_size = 0;
   Fault_Codes fault_codes_snapshot = fault_codes;
   for (int i = 0; i < 64; i++) {
     if (fault_codes_snapshot.mask & (((uint64_t)1) << i)) {
-      buff[k++] = static_cast<POSSIBLE_FAULTS>(uint64_t{1} << i);
+      possible_faults_buff[faults_buffer_size++] =
+          static_cast<POSSIBLE_FAULTS>(uint64_t{1} << i);
     }
   }
-
-  return k;
+  return faults_buffer_size;
 }
 
 void Parse_Motor_Position_Information(uint8_t *arr) {

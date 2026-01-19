@@ -379,11 +379,11 @@ struct Torque_Capability {
   int8_t torque_capability;
 };
 
-void Parse_Internal_States(uint8_t *);
+Internal_States Parse_Internal_States(uint8_t *);
 
 void Parse_Fault_Codes(uint8_t *);
 
-size_t Check_Fault_Codes(POSSIBLE_FAULTS *);
+size_t Check_Fault_Codes();
 
 void Parse_Motor_Position_Information(uint8_t *);
 

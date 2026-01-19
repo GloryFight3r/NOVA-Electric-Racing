@@ -1,12 +1,17 @@
 #include "can_controller.hpp"
+#include "can_utility.hpp"
 #include "inverter_broadcast.hpp"
 #include "inverter_command.hpp"
+#include "peripheral_controller.hpp"
 #include "zephyr/device.h"
 #include "zephyr/devicetree.h"
 #include "zephyr/drivers/can.h"
 #include "zephyr/kernel.h"
 
 const device *can_dev = DEVICE_DT_GET(DT_NODELABEL(can1));
+
+POSSIBLE_FAULTS possible_faults_buff[64];
+size_t faults_buffer_size = 0;
 
 struct can_rx_item {
   uint32_t msg_id;
@@ -21,18 +26,28 @@ void CAN_Parse_Thread(void *p1, void *p2, void *p3) {
     k_msgq_get(&can_rx_q, &item, K_FOREVER);
 
     switch (static_cast<CANMessageTypes>(item.msg_id)) {
-    case CANMessageTypes::INTERNAL_STATES:
-      Parse_Internal_States(item.data);
+    case CANMessageTypes::INTERNAL_STATES: {
+      Internal_States parsed_internal_state = Parse_Internal_States(item.data);
+      k_msgq_put(&state_transition_messages, &parsed_internal_state, K_FOREVER);
+
       break;
+    }
     case CANMessageTypes::FAULT_CODES: {
       Parse_Fault_Codes(item.data);
 
-      POSSIBLE_FAULTS possible_faults_buff[64] = {};
-      size_t err_size = Check_Fault_Codes(possible_faults_buff);
-      for (size_t i = 0; i < err_size; i++) {
-        printk("Error flag raised with id - %llu\n\r",
-               (unsigned long long)possible_faults_buff[i]);
+      size_t err_size = Check_Fault_Codes();
+
+      if (err_size) {
+        enableFaultsLed();
+
+        for (size_t i = 0; i < err_size; i++) {
+          printk("Error flag raised with id - %llu\n\r",
+                 (unsigned long long)possible_faults_buff[i]);
+        }
+      } else {
+        disableFaultsLed();
       }
+
       break;
     }
     case CANMessageTypes::MOTOR_POSITION_INFORMATION:
@@ -50,6 +65,11 @@ void CAN_Parse_Thread(void *p1, void *p2, void *p3) {
     }
   }
 }
+
+/*
+ * Receive CAN messages from the inverter and enqueue them in the parser's
+ * queue.
+ */
 void rx_callback_function(const device *dev, can_frame *frame,
                           void *user_data) {
   can_rx_item item = can_rx_item{
@@ -60,10 +80,18 @@ void rx_callback_function(const device *dev, can_frame *frame,
   k_msgq_put(&can_rx_q, &item, K_FOREVER);
 }
 
-void CAN_Initialize() {
+int32_t CAN_Initialize() {
+
+  if (!device_is_ready(can_dev)) {
+    printk("CAN device is not ready!");
+    return -1;
+  }
+
   const can_filter my_filter = {.id = 0, .mask = 0, .flags = 0};
 
   can_add_rx_filter(can_dev, rx_callback_function, nullptr, &my_filter);
+
+  return 0;
 }
 
 void CAN_Send_Message(uint16_t address, uint8_t message[]) {
