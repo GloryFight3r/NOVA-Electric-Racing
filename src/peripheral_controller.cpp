@@ -163,6 +163,8 @@ int32_t initPeripherals() {
     gpio_init_callback(switch_callbacks[i], all_isrs[i],
                        BIT(gpio_input_devices[i]->pin));
   }
+  enableMainRelay();
+  enablePrechargeRelay();
 
   return 0;
 }

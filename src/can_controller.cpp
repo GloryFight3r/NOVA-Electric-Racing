@@ -8,6 +8,15 @@
 #include "zephyr/drivers/can.h"
 #include "zephyr/kernel.h"
 
+//----------------------------------------------------------------------
+// DEBUG Defines
+
+// #define ERROR_DBG
+#define STATUS_DBG
+#define PARAMETER_RECEIVED_DBG
+
+//----------------------------------------------------------------------
+
 const device *can_dev = DEVICE_DT_GET(DT_NODELABEL(can1));
 
 POSSIBLE_FAULTS possible_faults_buff[64];
@@ -18,17 +27,36 @@ struct can_rx_item {
   uint8_t data[8];
 };
 
-K_MSGQ_DEFINE(can_rx_q, sizeof(can_rx_item), 64, 4);
+K_MSGQ_DEFINE(can_rx_q, sizeof(can_rx_item), 256, 4);
 
 void CAN_Parse_Thread(void *p1, void *p2, void *p3) {
   can_rx_item item;
   while (true) {
+
     k_msgq_get(&can_rx_q, &item, K_FOREVER);
 
     switch (static_cast<CANMessageTypes>(item.msg_id)) {
     case CANMessageTypes::INTERNAL_STATES: {
       Internal_States parsed_internal_state = Parse_Internal_States(item.data);
-      k_msgq_put(&state_transition_messages, &parsed_internal_state, K_FOREVER);
+      k_msgq_put(&state_transition_messages, &parsed_internal_state,
+                 K_MSEC(30));
+
+#ifdef STATUS_DBG
+
+      for (const auto &x : vsm_state_info_table) {
+        if (x.val == uint8_t(parsed_internal_state.vsm_state)) {
+          printk("----------------------------------------\n");
+          printk("Internal States message:\n");
+          printk("VSM State:%s\nInverter Enable State:%d\nRelay "
+                 "States:%u\nEND\n",
+                 x.str, parsed_internal_state.inverter_enable_state,
+                 int32_t(parsed_internal_state.relay_state));
+
+          printk("----------------------------------------\n");
+        }
+      }
+
+#endif
 
       break;
     }
@@ -38,12 +66,19 @@ void CAN_Parse_Thread(void *p1, void *p2, void *p3) {
       size_t err_size = Check_Fault_Codes();
 
       if (err_size) {
-        enableFaultsLed();
-
+        // enableFaultsLed();
+#ifdef ERROR_DBG
+        printk("----------------------------------------\n");
+        printk("Fault states:\n");
         for (size_t i = 0; i < err_size; i++) {
-          printk("Error flag raised with id - %llu\n\r",
-                 (unsigned long long)possible_faults_buff[i]);
+          for (const auto &x : possible_faults_table) {
+            if (x.mask == uint64_t(possible_faults_buff[i])) {
+              printk("Error of type: %s - occured\n", x.name);
+            }
+          }
         }
+        printk("----------------------------------------\n");
+#endif
       } else {
         disableFaultsLed();
       }
@@ -59,9 +94,18 @@ void CAN_Parse_Thread(void *p1, void *p2, void *p3) {
     case CANMessageTypes::PARAMETER_MESSAGE: {
       uint16_t parameter_address = 0;
       int16_t data = 0;
-      Parse_Parameter_Message(item.data, &parameter_address, &data);
+      bool success = false;
+      Parse_Parameter_Message(item.data, &parameter_address, &success, &data);
+#ifdef PARAMETER_RECEIVED_DBG
+      printk("Response from parameter message: %u %d %d\n", parameter_address,
+             success, data);
+#endif
+
       break;
     }
+    default:
+      // printk("In here\n");
+      break;
     }
   }
 }
@@ -77,7 +121,7 @@ void rx_callback_function(const struct device *dev, struct can_frame *frame,
       .data = {frame->data[0], frame->data[1], frame->data[2], frame->data[3],
                frame->data[4], frame->data[5], frame->data[6], frame->data[7]}};
 
-  k_msgq_put(&can_rx_q, &item, K_FOREVER);
+  k_msgq_put(&can_rx_q, &item, K_MSEC(20));
 }
 
 int32_t CAN_Initialize() {
@@ -87,7 +131,7 @@ int32_t CAN_Initialize() {
     return -1;
   }
 
-  if (can_set_mode(can_dev, CAN_MODE_LOOPBACK) != 0) {
+  if (can_set_mode(can_dev, CAN_MODE_NORMAL) != 0) {
     printk("Error setting CAN mode!\n");
     return -1;
   }
@@ -104,7 +148,7 @@ int32_t CAN_Initialize() {
   return 0;
 }
 
-void CAN_Send_Message(uint16_t address, uint8_t message[]) {
+void CAN_Send_Message(uint32_t address, uint8_t message[]) {
   struct can_frame frame = {
       .id = address,
       .dlc = 8,
@@ -112,7 +156,7 @@ void CAN_Send_Message(uint16_t address, uint8_t message[]) {
       .data = {message[0], message[1], message[2], message[3], message[4],
                message[5], message[6], message[7]},
   };
-  int32_t ret = can_send(can_dev, &frame, K_MSEC(100), NULL, NULL);
+  int32_t ret = can_send(can_dev, &frame, K_MSEC(20), NULL, NULL);
   if (ret < 0) {
     printk("Could not send CAN message!");
   }

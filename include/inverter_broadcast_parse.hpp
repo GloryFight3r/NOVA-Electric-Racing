@@ -78,18 +78,34 @@ struct Voltage_Information {
   int16_t vbc_vq_voltage;
 };
 
+#define VSM_STATE_LIST(x)                                                      \
+  X(VSM_START_STATE, 0)                                                        \
+  X(VSM_PRE_CHARGE_INIT_STATE, 1)                                              \
+  X(VSM_PRE_CHARGE_ACTIVE_STATE, 2)                                            \
+  X(VSM_PRE_CHARGE_COMPLETE_STATE, 3)                                          \
+  X(VSM_WAIT_STATE, 4)                                                         \
+  X(VSM_READY_STATE, 5)                                                        \
+  X(VSM_MOTOR_RUNNING_STATE, 6)                                                \
+  X(VSM_BLINK_FAULT_CODE_STATE, 7)                                             \
+  X(VSM_SHUTDOWN_IN_PROCESS, 14)                                               \
+  X(VSM_RECYCLE_POWER_STATE, 15)                                               \
+  X(VSM_UNKNOWN_STATE, 16)
+
 enum class VSM_STATE : uint8_t {
-  VSM_START_STATE = 0,
-  VSM_PRE_CHARGE_INIT_STATE = 1,
-  VSM_PRE_CHARGE_ACTIVE_STATE = 2,
-  VSM_PRE_CHARGE_COMPLETE_STATE = 3,
-  VSM_WAIT_STATE = 4,
-  VSM_READY_STATE = 5,
-  VSM_MOTOR_RUNNING_STATE = 6,
-  VSM_BLINK_FAULT_CODE_STATE = 7,
-  VSM_SHUTDOWN_IN_PROCESS = 14,
-  VSM_RECYCLE_POWER_STATE = 15,
-  VSM_UNKNOWN_STATE,
+#define X(name, value) name = value,
+  VSM_STATE_LIST(X)
+#undef X
+};
+
+struct VSM_STATE_INFO {
+  uint8_t val;
+  const char *str;
+};
+
+constexpr VSM_STATE_INFO vsm_state_info_table[] = {
+#define X(name, value) {value, #name},
+    VSM_STATE_LIST(X)
+#undef X
 };
 
 enum class INV_STATE : uint8_t {
@@ -234,64 +250,81 @@ struct Internal_States {
   bool limit_stall_burst_model;
 };
 
-enum class POSSIBLE_FAULTS : uint64_t {
-  // POST FAULTS
-  ERR_POST_HARDWARE_GATE_DESATURATION = 1ULL << 0,
-  ERR_HW_OVER_CURRENT = 1ULL << 1,
-  ERR_ACCELERATION_SHORTED = 1ULL << 2,
-  ERR_ACCELERATION_OPEN = 1ULL << 3,
-  ERR_CURRENT_SENSOR_LOW = 1ULL << 4,
-  ERR_CURRENT_SENSOR_HIGH = 1ULL << 5,
-  ERR_MODULE_TEMPERATURE_LOW = 1ULL << 6,
-  ERR_MODULE_TEMPERATURE_HIGH = 1ULL << 7,
-  ERR_CONTROL_PCB_TEMPERATURE_LOW = 1ULL << 8,
-  ERR_CONTROL_PCB_TEMPERATURE_HIGH = 1ULL << 9,
-  ERR_GATE_DRIVE_PCB_TEMPERATURE_LOW = 1ULL << 10,
-  ERR_GATE_DRIVE_PCB_TEMPERATURE_HIGH = 1ULL << 11,
-  ERR_5V_SENSE_VOLTAGE_LOW = 1ULL << 12,
-  ERR_5V_SENSE_VOLTAGE_HIGH = 1ULL << 13,
-  ERR_12V_SENSE_VOLTAGE_LOW = 1ULL << 14,
-  ERR_12V_SENSE_VOLTAGE_HIGH = 1ULL << 15,
-  ERR_2V5_SENSE_VOLTAGE_LOW = 1ULL << 16,
-  ERR_2V5_SENSE_VOLTAGE_HIGH = 1ULL << 17,
-  ERR_1V5_SENSE_VOLTAGE_LOW = 1ULL << 18,
-  ERR_1V5_SENSE_VOLTAGE_HIGH = 1ULL << 19,
-  ERR_DC_BUS_VOLTAGE_HIGH = 1ULL << 20,
-  ERR_DC_BUS_VOLTAGE_LOW = 1ULL << 21,
-  ERR_PRE_CHARGE_TIMEOUT = 1ULL << 22,
-  ERR_PRE_CHARGE_VOLTAGE_FAILURE = 1ULL << 23,
-  ERR_EEPROM_CHECKSUM_FAULED = 1ULL << 24,
-  ERR_EEPROM_DATA_OUT_OF_RANGE = 1ULL << 25,
-  ERR_EEPROM_UPDATE_REQUIRED = 1ULL << 26,
-  ERR_HARDWARE_DC_BUS_OVER_VOLTAGE_DURING_INITIALIZATION = 1ULL << 27,
-  ERR_BRAKE_SHORTED = 1ULL << 30,
-  ERR_BRAKE_OPEN = 1ULL << 31,
+// possible_faults.def
+#define POSSIBLE_FAULTS_LIST(X)                                                \
+  /* POST FAULTS */                                                            \
+  X(ERR_POST_HARDWARE_GATE_DESATURATION, 0)                                    \
+  X(ERR_HW_OVER_CURRENT, 1)                                                    \
+  X(ERR_ACCELERATION_SHORTED, 2)                                               \
+  X(ERR_ACCELERATION_OPEN, 3)                                                  \
+  X(ERR_CURRENT_SENSOR_LOW, 4)                                                 \
+  X(ERR_CURRENT_SENSOR_HIGH, 5)                                                \
+  X(ERR_MODULE_TEMPERATURE_LOW, 6)                                             \
+  X(ERR_MODULE_TEMPERATURE_HIGH, 7)                                            \
+  X(ERR_CONTROL_PCB_TEMPERATURE_LOW, 8)                                        \
+  X(ERR_CONTROL_PCB_TEMPERATURE_HIGH, 9)                                       \
+  X(ERR_GATE_DRIVE_PCB_TEMPERATURE_LOW, 10)                                    \
+  X(ERR_GATE_DRIVE_PCB_TEMPERATURE_HIGH, 11)                                   \
+  X(ERR_5V_SENSE_VOLTAGE_LOW, 12)                                              \
+  X(ERR_5V_SENSE_VOLTAGE_HIGH, 13)                                             \
+  X(ERR_12V_SENSE_VOLTAGE_LOW, 14)                                             \
+  X(ERR_12V_SENSE_VOLTAGE_HIGH, 15)                                            \
+  X(ERR_2V5_SENSE_VOLTAGE_LOW, 16)                                             \
+  X(ERR_2V5_SENSE_VOLTAGE_HIGH, 17)                                            \
+  X(ERR_1V5_SENSE_VOLTAGE_LOW, 18)                                             \
+  X(ERR_1V5_SENSE_VOLTAGE_HIGH, 19)                                            \
+  X(ERR_DC_BUS_VOLTAGE_HIGH, 20)                                               \
+  X(ERR_DC_BUS_VOLTAGE_LOW, 21)                                                \
+  X(ERR_PRE_CHARGE_TIMEOUT, 22)                                                \
+  X(ERR_PRE_CHARGE_VOLTAGE_FAILURE, 23)                                        \
+  X(ERR_EEPROM_CHECKSUM_FAULED, 24)                                            \
+  X(ERR_EEPROM_DATA_OUT_OF_RANGE, 25)                                          \
+  X(ERR_EEPROM_UPDATE_REQUIRED, 26)                                            \
+  X(ERR_HARDWARE_DC_BUS_OVER_VOLTAGE_DURING_INITIALIZATION, 27)                \
+  X(ERR_BRAKE_SHORTED, 30)                                                     \
+  X(ERR_BRAKE_OPEN, 31)                                                        \
+                                                                               \
+  /* RUN FAULTS */                                                             \
+  X(ERR_MOTOR_OVER_SPEED, 32)                                                  \
+  X(ERR_OVER_CURRENT, 33)                                                      \
+  X(ERR_OVER_VOLTAGE, 34)                                                      \
+  X(ERR_INVERTER_OVER_TEMPERATURE, 35)                                         \
+  X(ERR_ACCELERATOR_INPUT_SHORTED_FAULT, 36)                                   \
+  X(ERR_ACCELERATOR_INPUT_OPEN_FAULT, 37)                                      \
+  X(ERR_DIRECTION_COMMAND_FAULT, 38)                                           \
+  X(ERR_INVERTER_RESPONSE_TIME_OUT, 39)                                        \
+  X(ERR_RUN_HARDWARE_GATE_DESATURATION, 40)                                    \
+  X(ERR_HARDWARE_OVER_CURRENT, 41)                                             \
+  X(ERR_UNDER_VOLTAGE, 42)                                                     \
+  X(ERR_CAN_COMMAND_MESSAGE_LOST, 43)                                          \
+  X(ERR_MOTOR_OVER_TEMPERATURE, 44)                                            \
+  X(ERR_BRAKE_INPUT_SHORTED, 48)                                               \
+  X(ERR_BRAKE_INPUT_OPEN, 49)                                                  \
+  X(ERR_MODULE_A_OVER_TEMPERATURE, 50)                                         \
+  X(ERR_MODULE_B_OVER_TEMPERATURE, 51)                                         \
+  X(ERR_MODULE_C_OVER_TEMPERATURE, 52)                                         \
+  X(ERR_PCB_OVER_TEMPERATURE, 53)                                              \
+  X(ERR_GATE_DRIVE_BOARD_1_OVER_TEMPERATURE, 54)                               \
+  X(ERR_GATE_DRIVE_BOARD_2_OVER_TEMPERATURE, 55)                               \
+  X(ERR_GATE_DRIVE_BOARD_3_OVER_TEMPERATURE, 56)                               \
+  X(ERR_CURRENT_SENSOR, 57)                                                    \
+  X(ERR_RESOLVER_NOT_CONNECTED, 62)
 
-  // RUN FAULTS
-  ERR_MOTOR_OVER_SPEED = 1ULL << 32,
-  ERR_OVER_CURRENT = 1ULL << 33,
-  ERR_OVER_VOLTAGE = 1ULL << 34,
-  ERR_INVERTER_OVER_TEMPERATURE = 1ULL << 35,
-  ERR_ACCELERATOR_INPUT_SHORTED_FAULT = 1ULL << 36,
-  ERR_ACCELERATOR_INPUT_OPEN_FAULT = 1ULL << 37,
-  ERR_DIRECTION_COMMAND_FAULT = 1ULL << 38,
-  ERR_INVERTER_RESPONSE_TIME_OUT = 1ULL << 39,
-  ERR_RUN_HARDWARE_GATE_DESATURATION = 1ULL << 40,
-  ERR_HARDWARE_OVER_CURRENT = 1ULL << 41,
-  ERR_UNDER_VOLTAGE = 1ULL << 42,
-  ERR_CAN_COMMAND_MESSAGE_LOST = 1ULL << 43,
-  ERR_MOTOR_OVER_TEMPERATURE = 1ULL << 44,
-  ERR_BRAKE_INPUT_SHORTED = 1ULL << 48,
-  ERR_BRAKE_INPUT_OPEN = 1ULL << 49,
-  ERR_MODULE_A_OVER_TEMPERATURE = 1ULL << 50,
-  ERR_MODULE_B_OVER_TEMPERATURE = 1ULL << 51,
-  ERR_MODULE_C_OVER_TEMPERATURE = 1ULL << 52,
-  ERR_PCB_OVER_TEMPERATURE = 1ULL << 53,
-  ERR_GATE_DRIVE_BOARD_1_OVER_TEMPERATURE = 1ULL << 54,
-  ERR_GATE_DRIVE_BOARD_2_OVER_TEMPERATURE = 1ULL << 55,
-  ERR_GATE_DRIVE_BOARD_3_OVER_TEMPERATURE = 1ULL << 56,
-  ERR_CURRENT_SENSOR = 1ULL << 57,
-  ERR_RESOLVER_NOT_CONNECTED = 1ULL << 62,
+enum class POSSIBLE_FAULTS : uint64_t {
+#define X(name, bit) name = (1ULL << bit),
+  POSSIBLE_FAULTS_LIST(X)
+#undef X
+};
+
+struct FaultInfo {
+  uint64_t mask;
+  const char *name;
+};
+
+constexpr FaultInfo possible_faults_table[] = {
+#define X(name, bit) {(1ULL << bit), #name},
+    POSSIBLE_FAULTS_LIST(X)
+#undef X
 };
 
 /*

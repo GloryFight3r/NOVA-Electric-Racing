@@ -23,7 +23,7 @@ void CAN_Parse_Thread(void *p1, void *p2, void *p3);
 
 // ---------------------------------------------------------
 
-void CAN_Send_Message(uint16_t address, uint8_t message[]);
+void CAN_Send_Message(uint32_t address, uint8_t message[]);
 
 // ---------------------------------------------------------
 

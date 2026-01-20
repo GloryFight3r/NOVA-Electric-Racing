@@ -22,8 +22,8 @@ void State_Transition() {
      */
     switch (next_state.vsm_state) {
     case VSM_STATE::VSM_START_STATE:
-      disableMainRelay();
-      disablePrechargeRelay();
+      // disableMainRelay();
+      // disablePrechargeRelay();
 
       break;
     case VSM_STATE::VSM_PRE_CHARGE_INIT_STATE:
@@ -31,13 +31,13 @@ void State_Transition() {
        * Performs VDC checks and if the voltage is under the threshold,
        * transition to VSM_PRE_CHARGE_ACTIVE_STATE
        */
-      disableMainRelay();
-      disablePrechargeRelay();
+      // disableMainRelay();
+      // disablePrechargeRelay();
 
       break;
     case VSM_STATE::VSM_PRE_CHARGE_ACTIVE_STATE:
-      disableMainRelay();
-      enablePrechargeRelay();
+      // disableMainRelay();
+      // enablePrechargeRelay();
 
       break;
     case VSM_STATE::VSM_PRE_CHARGE_COMPLETE_STATE:
@@ -45,8 +45,8 @@ void State_Transition() {
        * also preforms stability check on the voltage. Once
        * checks are completed transition to VSM_WAIT_STATE
        */
-      disablePrechargeRelay();
-      enableMainRelay();
+      // disablePrechargeRelay();
+      // enableMainRelay();
 
       break;
     case VSM_STATE::VSM_WAIT_STATE:
@@ -58,31 +58,31 @@ void State_Transition() {
        * NOTE: Furthermore, Key_Switch_Mode is ineffective in CAN mode, so this
        * whole state should quickly transition to VSM_READY_STATE
        */
-      disablePrechargeRelay();
-      enableMainRelay();
+      // disablePrechargeRelay();
+      // enableMainRelay();
 
       break;
     case VSM_STATE::VSM_READY_STATE:
       /*
        * The system is waiting for Enable Inverter Command,
        */
-      disablePrechargeRelay();
-      enableMainRelay();
+      // disablePrechargeRelay();
+      // enableMainRelay();
 
       break;
     case VSM_STATE::VSM_MOTOR_RUNNING_STATE:
-      disablePrechargeRelay();
-      enableMainRelay();
+      // disablePrechargeRelay();
+      // enableMainRelay();
 
       break;
     case VSM_STATE::VSM_BLINK_FAULT_CODE_STATE:
-      disablePrechargeRelay();
-      disableMainRelay();
+      // disablePrechargeRelay();
+      // disableMainRelay();
 
       break;
     case VSM_STATE::VSM_SHUTDOWN_IN_PROCESS:
-      disablePrechargeRelay();
-      disableMainRelay();
+      // disablePrechargeRelay();
+      // disableMainRelay();
 
       break;
     case VSM_STATE::VSM_RECYCLE_POWER_STATE:
@@ -92,8 +92,8 @@ void State_Transition() {
        * values to take effect, the controller must be re-powered.
        */
 
-      disablePrechargeRelay();
-      disableMainRelay();
+      // disablePrechargeRelay();
+      // disableMainRelay();
 
       break;
     default:
@@ -123,12 +123,12 @@ void Pulse_Command() {
   }
 
   // start the timer
-  k_timer_start(&pulse_timer, K_NO_WAIT, K_MSEC(600));
+  k_timer_start(&pulse_timer, K_NO_WAIT, K_MSEC(50));
 
   while (true) {
     k_sem_take(&pulse_sem, K_FOREVER);
-    printk("%d %d %d %d\n", pulse_message.torque, pulse_message.speed,
-           pulse_message.inverter_enable, pulse_message.inverter_discharge);
+    // printk("%d %d %d %d\n", pulse_message.torque, pulse_message.speed,
+    //        pulse_message.inverter_enable, pulse_message.inverter_discharge);
 
     Send_Command(pulse_message.torque, pulse_message.speed,
                  pulse_message.direction, pulse_message.inverter_enable,
@@ -137,4 +137,4 @@ void Pulse_Command() {
   }
 }
 
-void Clear_Faults() { Send_Parameter(0x20, 1, 0x0); }
+void Clear_Faults() { Send_Parameter(20, 1, 0x0); }

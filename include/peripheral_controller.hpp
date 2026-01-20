@@ -13,8 +13,8 @@ int32_t initPeripherals();
 // ---------------------------------------------------------
 
 // pre-charge relays
-const int32_t PWM_PERIOD = PWM_MSEC(1000);
-const int32_t PWM_DUTY_PERIOD = PWM_MSEC(1000);
+const int64_t PWM_PERIOD = PWM_USEC(1000);
+const int64_t PWM_DUTY_PERIOD = PWM_USEC(1000);
 const int16_t TORQUE_SCALER = 10;
 
 void enablePrechargeRelay();
