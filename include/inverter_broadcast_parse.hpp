@@ -414,17 +414,12 @@ struct Torque_Capability {
 
 Internal_States Parse_Internal_States(uint8_t *);
 
-void Parse_Fault_Codes(uint8_t *);
+Fault_Codes Parse_Fault_Codes(uint8_t *);
 
-size_t Check_Fault_Codes();
+size_t Check_Fault_Codes(Fault_Codes fault_codes);
 
-void Parse_Motor_Position_Information(uint8_t *);
+Motor_Position_Information Parse_Motor_Position_Information(uint8_t *);
 
-void Parse_Voltage_Information(uint8_t *);
-
-extern Motor_Position_Information motor_position_information;
-extern Voltage_Information voltage_information;
-extern Internal_States internal_states;
-extern Fault_Codes fault_codes;
+Voltage_Information Parse_Voltage_Information(uint8_t *);
 
 #endif /* INVERTER_BROADCAST_PARSE_H */

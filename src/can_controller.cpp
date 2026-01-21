@@ -7,13 +7,17 @@
 #include "zephyr/devicetree.h"
 #include "zephyr/drivers/can.h"
 #include "zephyr/kernel.h"
+#include "zephyr/logging/log.h"
 
 //----------------------------------------------------------------------
 // DEBUG Defines
 
-// #define ERROR_DBG
+LOG_MODULE_REGISTER(can_message_parse, LOG_LEVEL_INF);
+
+#define ERROR_DBG
 #define STATUS_DBG
 #define PARAMETER_RECEIVED_DBG
+#define VOLTAGE_DBG
 
 //----------------------------------------------------------------------
 
@@ -38,21 +42,18 @@ void CAN_Parse_Thread(void *p1, void *p2, void *p3) {
     switch (static_cast<CANMessageTypes>(item.msg_id)) {
     case CANMessageTypes::INTERNAL_STATES: {
       Internal_States parsed_internal_state = Parse_Internal_States(item.data);
-      k_msgq_put(&state_transition_messages, &parsed_internal_state,
-                 K_MSEC(30));
+      if (k_msgq_put(&state_transition_messages, &parsed_internal_state,
+                     K_MSEC(30)) < 0) {
+        LOG_ERR("Could not send a state transition message in time!");
+      }
 
 #ifdef STATUS_DBG
 
       for (const auto &x : vsm_state_info_table) {
         if (x.val == uint8_t(parsed_internal_state.vsm_state)) {
-          printk("----------------------------------------\n");
-          printk("Internal States message:\n");
-          printk("VSM State:%s\nInverter Enable State:%d\nRelay "
-                 "States:%u\nEND\n",
-                 x.str, parsed_internal_state.inverter_enable_state,
-                 int32_t(parsed_internal_state.relay_state));
-
-          printk("----------------------------------------\n");
+          LOG_DBG("VSM State:%s -- Inverter Enable State:%d -- Relay States:%u",
+                  x.str, parsed_internal_state.inverter_enable_state,
+                  int32_t(parsed_internal_state.relay_state));
         }
       }
 
@@ -61,23 +62,20 @@ void CAN_Parse_Thread(void *p1, void *p2, void *p3) {
       break;
     }
     case CANMessageTypes::FAULT_CODES: {
-      Parse_Fault_Codes(item.data);
+      Fault_Codes fault_codes = Parse_Fault_Codes(item.data);
 
-      size_t err_size = Check_Fault_Codes();
+      size_t err_size = Check_Fault_Codes(fault_codes);
 
       if (err_size) {
         // enableFaultsLed();
 #ifdef ERROR_DBG
-        printk("----------------------------------------\n");
-        printk("Fault states:\n");
         for (size_t i = 0; i < err_size; i++) {
           for (const auto &x : possible_faults_table) {
             if (x.mask == uint64_t(possible_faults_buff[i])) {
-              printk("Error of type: %s - occured\n", x.name);
+              LOG_DBG("Error of type: %s - occured", x.name);
             }
           }
         }
-        printk("----------------------------------------\n");
 #endif
       } else {
         disableFaultsLed();
@@ -85,26 +83,37 @@ void CAN_Parse_Thread(void *p1, void *p2, void *p3) {
 
       break;
     }
-    case CANMessageTypes::MOTOR_POSITION_INFORMATION:
-      Parse_Motor_Position_Information(item.data);
+    case CANMessageTypes::MOTOR_POSITION_INFORMATION: {
+      Motor_Position_Information motor_position_information =
+          Parse_Motor_Position_Information(item.data);
       break;
-    case CANMessageTypes::VOLTAGE_INFORMATION:
-      Parse_Voltage_Information(item.data);
+    }
+    case CANMessageTypes::VOLTAGE_INFORMATION: {
+
+      Voltage_Information voltage_information =
+          Parse_Voltage_Information(item.data);
+
+#ifdef VOLTAGE_DBG
+      LOG_DBG("Voltage Information: DC BUS Voltage: %d, Output Voltage: %d",
+              voltage_information.dc_bus_voltage,
+              voltage_information.output_voltage);
+#endif
+
       break;
+    }
     case CANMessageTypes::PARAMETER_MESSAGE: {
       uint16_t parameter_address = 0;
       int16_t data = 0;
       bool success = false;
       Parse_Parameter_Message(item.data, &parameter_address, &success, &data);
 #ifdef PARAMETER_RECEIVED_DBG
-      printk("Response from parameter message: %u %d %d\n", parameter_address,
-             success, data);
+      LOG_DBG("Response from parameter message: %u %d %d", parameter_address,
+              success, data);
 #endif
 
       break;
     }
     default:
-      // printk("In here\n");
       break;
     }
   }
@@ -121,34 +130,39 @@ void rx_callback_function(const struct device *dev, struct can_frame *frame,
       .data = {frame->data[0], frame->data[1], frame->data[2], frame->data[3],
                frame->data[4], frame->data[5], frame->data[6], frame->data[7]}};
 
-  k_msgq_put(&can_rx_q, &item, K_MSEC(20));
+  if (k_msgq_put(&can_rx_q, &item, K_NO_WAIT) < 0) {
+    LOG_ERR("Could not send received CAN message to the parse queue!");
+  }
 }
 
 int32_t CAN_Initialize() {
 
   if (!device_is_ready(can_dev)) {
-    printk("CAN device is not ready!\n");
+    LOG_ERR("CAN device is not ready!");
     return -1;
   }
 
   if (can_set_mode(can_dev, CAN_MODE_NORMAL) != 0) {
-    printk("Error setting CAN mode!\n");
+    LOG_ERR("Error setting CAN mode!");
     return -1;
   }
 
   if (can_start(can_dev) != 0) {
-    printk("Couldn't start CAN device\n");
+    LOG_ERR("Couldn't start CAN device");
     return -1;
   }
 
   const can_filter my_filter = {.id = 0, .mask = 0, .flags = CAN_FILTER_IDE};
 
-  can_add_rx_filter(can_dev, rx_callback_function, nullptr, &my_filter);
+  if (can_add_rx_filter(can_dev, rx_callback_function, nullptr, &my_filter) <
+      0) {
+    LOG_ERR("Could not add a callback function");
+  }
 
   return 0;
 }
 
-void CAN_Send_Message(uint32_t address, uint8_t message[]) {
+void CAN_Send_Message(uint32_t address, const uint8_t message[]) {
   struct can_frame frame = {
       .id = address,
       .dlc = 8,
@@ -158,6 +172,6 @@ void CAN_Send_Message(uint32_t address, uint8_t message[]) {
   };
   int32_t ret = can_send(can_dev, &frame, K_MSEC(20), NULL, NULL);
   if (ret < 0) {
-    printk("Could not send CAN message!");
+    LOG_ERR("Could not send CAN message!");
   }
 }

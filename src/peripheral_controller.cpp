@@ -6,6 +6,7 @@
 #include "zephyr/drivers/pwm.h"
 #include "zephyr/dt-bindings/gpio/gpio.h"
 #include "zephyr/kernel.h"
+#include "zephyr/logging/log.h"
 #include "zephyr/sys/util.h"
 #include <zephyr/input/input.h>
 
@@ -15,6 +16,9 @@
 #include <zephyr/pm/state.h>
 
 #include <zephyr/drivers/gpio.h>
+
+// Logging
+LOG_MODULE_REGISTER(peripheral_logs, LOG_LEVEL_INF);
 
 // ---------------------------------------------------------
 
@@ -128,37 +132,48 @@ static isr_t all_isrs[] = {inv_switch_isr, speedmode_switch_isr,
 
 int32_t initPeripherals() {
   if (!pwm_is_ready_dt(&pre_charge_relay_pwm)) {
-    printk("PWM device not ready\n");
+    LOG_ERR("PWM device not ready");
     return -1;
   }
   disablePrechargeRelay();
 
   if (!device_is_ready(rotary_encoder)) {
-    printk("Rotary is not ready!\n");
+    LOG_ERR("Rotary is not ready!");
     return -1;
   }
 
   for (size_t i{0}; i < GPIO_OUTPUT_CNT; i++) {
     if (!gpio_is_ready_dt(gpio_output_devices[i])) {
-      printk("GPIO output %d was not ready.\n", i);
+      LOG_ERR("GPIO output %d was not ready.", i);
       return -1;
     }
 
-    gpio_pin_configure_dt(gpio_output_devices[i], GPIO_OUTPUT_ACTIVE);
-    gpio_pin_set_dt(gpio_output_devices[i], false);
+    if (gpio_pin_configure_dt(gpio_output_devices[i], GPIO_OUTPUT_ACTIVE) < 0) {
+      LOG_ERR("Could not configure GPIO output pin %d", i);
+    }
+    if (gpio_pin_set_dt(gpio_output_devices[i], false) < 0) {
+      LOG_ERR("Could not set value to GPIO output pin %d", i);
+    }
   }
 
   for (size_t i{0}; i < GPIO_INPUT_CNT; i++) {
     if (!gpio_is_ready_dt(gpio_input_devices[i])) {
-      printk("GPIO input %d was not ready!\n", i);
+      LOG_ERR("GPIO input %d was not ready!", i);
       return -1;
     }
-    gpio_pin_configure_dt(gpio_input_devices[i], (GPIO_INPUT | GPIO_PULL_UP));
+    if (gpio_pin_configure_dt(gpio_input_devices[i],
+                              (GPIO_INPUT | GPIO_PULL_UP)) < 0) {
+      LOG_ERR("Could not configure GPIO input pin %d", i);
+    }
 
-    gpio_pin_interrupt_configure_dt(gpio_input_devices[i],
-                                    GPIO_INT_EDGE_TO_ACTIVE);
+    if (gpio_pin_interrupt_configure_dt(gpio_input_devices[i],
+                                        GPIO_INT_EDGE_TO_ACTIVE) < 0) {
+      LOG_ERR("Could not configure interrupt for GPIO input pin %d", i);
+    }
 
-    gpio_add_callback(gpio_input_devices[i]->port, switch_callbacks[i]);
+    if (gpio_add_callback(gpio_input_devices[i]->port, switch_callbacks[i])) {
+      LOG_ERR("Could not add a callback for GPIO input pin %d", i);
+    }
 
     gpio_init_callback(switch_callbacks[i], all_isrs[i],
                        BIT(gpio_input_devices[i]->pin));
@@ -172,23 +187,43 @@ int32_t initPeripherals() {
 // ---------------------------------------------------------
 
 void enablePrechargeRelay() {
-  pwm_set_dt(&pre_charge_relay_pwm, PWM_PERIOD, PWM_DUTY_PERIOD);
+  if (pwm_set_dt(&pre_charge_relay_pwm, PWM_PERIOD, PWM_DUTY_PERIOD) < 0) {
+    LOG_ERR("Could not activate the PWM pin!");
+  }
 }
 
 void disablePrechargeRelay() {
-  pwm_set_dt(&pre_charge_relay_pwm, PWM_PERIOD, 0);
+  if (pwm_set_dt(&pre_charge_relay_pwm, PWM_PERIOD, 0) < 0) {
+    LOG_ERR("Could not de-activate the PWM pin!");
+  }
 }
 
 // ---------------------------------------------------------
 
-void enableMainRelay() { gpio_pin_set_dt(&main_relay, true); }
+void enableMainRelay() {
+  if (gpio_pin_set_dt(&main_relay, true) < 0) {
+    LOG_ERR("Could not activate main relay!");
+  }
+}
 
-void disableMainRelay() { gpio_pin_set_dt(&main_relay, false); }
+void disableMainRelay() {
+  if (gpio_pin_set_dt(&main_relay, false) < 0) {
+    LOG_ERR("Could not de-activate the main relay!");
+  }
+}
 // ---------------------------------------------------------
 
-void enableFaultsLed() { gpio_pin_set_dt(&faults_led, true); }
+void enableFaultsLed() {
+  if (gpio_pin_set_dt(&faults_led, true) < 0) {
+    LOG_ERR("Could not enable the fault LED!");
+  }
+}
 
-void disableFaultsLed() { gpio_pin_set_dt(&faults_led, false); }
+void disableFaultsLed() {
+  if (gpio_pin_set_dt(&faults_led, false) < 0) {
+    LOG_ERR("Could not de-activate the fault LED");
+  }
+}
 
 // ---------------------------------------------------------
 

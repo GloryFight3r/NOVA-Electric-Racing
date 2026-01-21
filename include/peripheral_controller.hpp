@@ -2,7 +2,6 @@
 #define PERIPHERAL_CONTROLLER_H
 
 #include "zephyr/dt-bindings/pwm/pwm.h"
-#include "zephyr/kernel.h"
 #include <cstdint>
 
 // ---------------------------------------------------------

@@ -1,9 +1,13 @@
 #include "can_utility.hpp"
 #include "inverter_broadcast_parse.hpp"
 #include "inverter_command.hpp"
-#include "peripheral_controller.hpp"
 #include "zephyr/kernel.h"
+#include "zephyr/logging/log.h"
 
+// Logging
+LOG_MODULE_REGISTER(can_utility, LOG_LEVEL_INF);
+
+// Message queue for the state transitions
 K_MSGQ_DEFINE(state_transition_messages, sizeof(StateMessage), 64, 4);
 
 void State_Transition() {
@@ -22,8 +26,6 @@ void State_Transition() {
      */
     switch (next_state.vsm_state) {
     case VSM_STATE::VSM_START_STATE:
-      // disableMainRelay();
-      // disablePrechargeRelay();
 
       break;
     case VSM_STATE::VSM_PRE_CHARGE_INIT_STATE:
@@ -31,13 +33,9 @@ void State_Transition() {
        * Performs VDC checks and if the voltage is under the threshold,
        * transition to VSM_PRE_CHARGE_ACTIVE_STATE
        */
-      // disableMainRelay();
-      // disablePrechargeRelay();
 
       break;
     case VSM_STATE::VSM_PRE_CHARGE_ACTIVE_STATE:
-      // disableMainRelay();
-      // enablePrechargeRelay();
 
       break;
     case VSM_STATE::VSM_PRE_CHARGE_COMPLETE_STATE:
@@ -45,8 +43,6 @@ void State_Transition() {
        * also preforms stability check on the voltage. Once
        * checks are completed transition to VSM_WAIT_STATE
        */
-      // disablePrechargeRelay();
-      // enableMainRelay();
 
       break;
     case VSM_STATE::VSM_WAIT_STATE:
@@ -58,31 +54,21 @@ void State_Transition() {
        * NOTE: Furthermore, Key_Switch_Mode is ineffective in CAN mode, so this
        * whole state should quickly transition to VSM_READY_STATE
        */
-      // disablePrechargeRelay();
-      // enableMainRelay();
 
       break;
     case VSM_STATE::VSM_READY_STATE:
       /*
        * The system is waiting for Enable Inverter Command,
        */
-      // disablePrechargeRelay();
-      // enableMainRelay();
 
       break;
     case VSM_STATE::VSM_MOTOR_RUNNING_STATE:
-      // disablePrechargeRelay();
-      // enableMainRelay();
 
       break;
     case VSM_STATE::VSM_BLINK_FAULT_CODE_STATE:
-      // disablePrechargeRelay();
-      // disableMainRelay();
 
       break;
     case VSM_STATE::VSM_SHUTDOWN_IN_PROCESS:
-      // disablePrechargeRelay();
-      // disableMainRelay();
 
       break;
     case VSM_STATE::VSM_RECYCLE_POWER_STATE:
@@ -91,9 +77,6 @@ void State_Transition() {
        * has been successfully completed. For new EEPROM
        * values to take effect, the controller must be re-powered.
        */
-
-      // disablePrechargeRelay();
-      // disableMainRelay();
 
       break;
     default:
@@ -127,8 +110,10 @@ void Pulse_Command() {
 
   while (true) {
     k_sem_take(&pulse_sem, K_FOREVER);
-    // printk("%d %d %d %d\n", pulse_message.torque, pulse_message.speed,
-    //        pulse_message.inverter_enable, pulse_message.inverter_discharge);
+    LOG_INF("Command Message Values: Torque:%d Speed:%d Inv_Enable:%d "
+            "Inv_Discharge:%d",
+            pulse_message.torque, pulse_message.speed,
+            pulse_message.inverter_enable, pulse_message.inverter_discharge);
 
     Send_Command(pulse_message.torque, pulse_message.speed,
                  pulse_message.direction, pulse_message.inverter_enable,
