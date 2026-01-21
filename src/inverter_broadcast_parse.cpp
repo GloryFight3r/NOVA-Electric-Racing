@@ -1,12 +1,7 @@
-#include "inverter_broadcast.hpp"
+#include "inverter_broadcast_parse.hpp"
 #include "can_controller.hpp"
 #include <stdbool.h>
 #include <stddef.h>
-
-Motor_Position_Information motor_position_information;
-Voltage_Information voltage_information;
-Internal_States internal_states;
-Fault_Codes fault_codes;
 
 Internal_States Parse_Internal_States(uint8_t *arr) {
   VSM_STATE vsm_state = static_cast<VSM_STATE>(arr[0]);
@@ -89,7 +84,7 @@ Internal_States Parse_Internal_States(uint8_t *arr) {
 
   bool limit_stall_burst_model = (arr[7] & (1 << 7));
 
-  internal_states = Internal_States{
+  return Internal_States{
       .vsm_state = vsm_state,
       .pwm_frequency = pwm_frequency,
       .inverter_state = inv_state,
@@ -112,10 +107,9 @@ Internal_States Parse_Internal_States(uint8_t *arr) {
       .coolant_temperature_limiting = coolant_temp_limiting,
       .limit_stall_burst_model = limit_stall_burst_model,
   };
-  return internal_states;
 }
 
-void Parse_Fault_Codes(uint8_t *arr) {
+Fault_Codes Parse_Fault_Codes(uint8_t *arr) {
   uint64_t fault_codes_as_uint64[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 
   // need to cast it into uint64_t in order to
@@ -130,14 +124,13 @@ void Parse_Fault_Codes(uint8_t *arr) {
        (fault_codes_as_uint64[4] << 32) | (fault_codes_as_uint64[5] << 40) |
        (fault_codes_as_uint64[6] << 48) | (fault_codes_as_uint64[7] << 56));
 
-  fault_codes = Fault_Codes{.mask = final_mask};
+  return Fault_Codes{.mask = final_mask};
 }
 
-size_t Check_Fault_Codes() {
+size_t Check_Fault_Codes(Fault_Codes fault_codes) {
   faults_buffer_size = 0;
-  Fault_Codes fault_codes_snapshot = fault_codes;
   for (int i = 0; i < 64; i++) {
-    if (fault_codes_snapshot.mask & (((uint64_t)1) << i)) {
+    if (fault_codes.mask & (((uint64_t)1) << i)) {
       possible_faults_buff[faults_buffer_size++] =
           static_cast<POSSIBLE_FAULTS>(uint64_t{1} << i);
     }
@@ -145,14 +138,14 @@ size_t Check_Fault_Codes() {
   return faults_buffer_size;
 }
 
-void Parse_Motor_Position_Information(uint8_t *arr) {
+Motor_Position_Information Parse_Motor_Position_Information(uint8_t *arr) {
   int16_t motor_angle = ((int16_t)arr[0]) | (((int16_t)arr[1]) << 8);
   int16_t motor_speed = ((int16_t)arr[2]) | (((int16_t)arr[3]) << 8);
   int16_t electrical_output_freq = ((int16_t)arr[4]) | (((int16_t)arr[5]) << 8);
   int16_t delta_resolver_filtered =
       ((int16_t)arr[6]) | (((int16_t)arr[7]) << 8);
 
-  motor_position_information = (Motor_Position_Information){
+  return Motor_Position_Information{
       .motor_angle = motor_angle,
       .motor_speed = motor_speed,
       .electrical_output_freq = electrical_output_freq,
@@ -160,13 +153,13 @@ void Parse_Motor_Position_Information(uint8_t *arr) {
   };
 }
 
-void Parse_Voltage_Information(uint8_t *arr) {
+Voltage_Information Parse_Voltage_Information(uint8_t *arr) {
   int16_t dc_buc_voltage = ((int16_t)arr[0]) | (((int16_t)arr[1]) << 8);
   int16_t output_voltage = ((int16_t)arr[2]) | (((int16_t)arr[3]) << 8);
   int16_t vab_vd_voltage = ((int16_t)arr[4]) | (((int16_t)arr[5]) << 8);
   int16_t vbc_vq_voltage = ((int16_t)arr[6]) | (((int16_t)arr[7]) << 8);
 
-  voltage_information = Voltage_Information{
+  return Voltage_Information{
       .dc_bus_voltage = dc_buc_voltage,
       .output_voltage = output_voltage,
       .vab_vd_voltage = vab_vd_voltage,

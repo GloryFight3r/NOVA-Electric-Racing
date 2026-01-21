@@ -1,7 +1,7 @@
 #ifndef PERIPHERAL_CONTROLLER_H
 #define PERIPHERAL_CONTROLLER_H
 
-#include "zephyr/kernel.h"
+#include "zephyr/dt-bindings/pwm/pwm.h"
 #include <cstdint>
 
 // ---------------------------------------------------------
@@ -12,8 +12,9 @@ int32_t initPeripherals();
 // ---------------------------------------------------------
 
 // pre-charge relays
-const k_timeout_t PWM_PERIOD = K_MSEC(100);
-const k_timeout_t PWM_DUTY_PERIOD = K_MSEC(50);
+const int64_t PWM_PERIOD = PWM_USEC(1000);
+const int64_t PWM_DUTY_PERIOD = PWM_USEC(1000);
+const int16_t TORQUE_SCALER = 10;
 
 void enablePrechargeRelay();
 void disablePrechargeRelay();

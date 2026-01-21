@@ -1,7 +1,7 @@
 #ifndef CAN_CONTROLLER_H
 #define CAN_CONTROLLER_H
 
-#include "inverter_broadcast.hpp"
+#include "inverter_broadcast_parse.hpp"
 
 #include <cstdint>
 
@@ -23,11 +23,11 @@ void CAN_Parse_Thread(void *p1, void *p2, void *p3);
 
 // ---------------------------------------------------------
 
-void CAN_Send_Message(uint16_t address, uint8_t message[]);
+void CAN_Send_Message(uint32_t address, const uint8_t message[]);
 
 // ---------------------------------------------------------
 
 extern POSSIBLE_FAULTS possible_faults_buff[64];
 extern size_t faults_buffer_size;
 
-#endif // !CAN_CONTROLLER_H
+#endif // CAN_CONTROLLER_H

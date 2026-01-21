@@ -5,8 +5,8 @@
 #include "zephyr/devicetree.h"
 #include "zephyr/drivers/pwm.h"
 #include "zephyr/dt-bindings/gpio/gpio.h"
-#include "zephyr/dt-bindings/pwm/pwm.h"
 #include "zephyr/kernel.h"
+#include "zephyr/logging/log.h"
 #include "zephyr/sys/util.h"
 #include <zephyr/input/input.h>
 
@@ -16,6 +16,9 @@
 #include <zephyr/pm/state.h>
 
 #include <zephyr/drivers/gpio.h>
+
+// Logging
+LOG_MODULE_REGISTER(peripheral_logs, LOG_LEVEL_INF);
 
 // ---------------------------------------------------------
 
@@ -44,18 +47,23 @@ static const gpio_dt_spec speed_mode_switch =
 static const gpio_dt_spec faults_clear_sw =
     GPIO_DT_SPEC_GET(DT_ALIAS(faults_clear_sw), gpios);
 
-static const int32_t GPIO_INPUT_CNT = 3;
+static const gpio_dt_spec discharge_clear_sw =
+    GPIO_DT_SPEC_GET(DT_ALIAS(discharge_sw), gpios);
+
+static const int32_t GPIO_INPUT_CNT = 4;
 static const gpio_dt_spec *gpio_input_devices[GPIO_INPUT_CNT] = {
-    &inverter_enable_switch, &speed_mode_switch, &faults_clear_sw};
+    &inverter_enable_switch, &speed_mode_switch, &faults_clear_sw,
+    &discharge_clear_sw};
 
 // ---------------------------------------------------------
 
 gpio_callback inv_switch_cb;
 gpio_callback speedmode_switch_cb;
 gpio_callback faults_clear_cb;
+gpio_callback discharge_cb;
 
 gpio_callback *switch_callbacks[GPIO_INPUT_CNT] = {
-    &inv_switch_cb, &speedmode_switch_cb, &faults_clear_cb};
+    &inv_switch_cb, &speedmode_switch_cb, &faults_clear_cb, &discharge_cb};
 
 // ---------------------------------------------------------
 
@@ -100,50 +108,78 @@ void faults_clear_isr(const struct device *dev, struct gpio_callback *cb,
 
 // ---------------------------------------------------------
 
+void discharge_switch_handler(struct k_work *work) {
+  pulse_message.inverter_discharge ^= 1;
+}
+
+static K_WORK_DELAYABLE_DEFINE(discharge_switch_worker,
+                               discharge_switch_handler);
+
+void discharge_switch_isr(const struct device *dev, struct gpio_callback *cb,
+                          uint32_t pins) {
+
+  k_work_reschedule(&discharge_switch_worker, K_MSEC(300));
+}
+
+// ---------------------------------------------------------
+
 typedef void (*isr_t)(const struct device *, struct gpio_callback *, uint32_t);
 
 static isr_t all_isrs[] = {inv_switch_isr, speedmode_switch_isr,
-                           faults_clear_isr};
+                           faults_clear_isr, discharge_switch_isr};
 
 // ---------------------------------------------------------
 
 int32_t initPeripherals() {
   if (!pwm_is_ready_dt(&pre_charge_relay_pwm)) {
-    printk("PWM device not ready\n");
+    LOG_ERR("PWM device not ready");
     return -1;
   }
   disablePrechargeRelay();
 
   if (!device_is_ready(rotary_encoder)) {
-    printk("Rotary is not ready!\n");
+    LOG_ERR("Rotary is not ready!");
     return -1;
   }
 
   for (size_t i{0}; i < GPIO_OUTPUT_CNT; i++) {
     if (!gpio_is_ready_dt(gpio_output_devices[i])) {
-      printk("GPIO output %d was not ready.\n", i);
+      LOG_ERR("GPIO output %d was not ready.", i);
       return -1;
     }
 
-    gpio_pin_configure_dt(gpio_output_devices[i], GPIO_OUTPUT_ACTIVE);
-    gpio_pin_set_dt(gpio_output_devices[i], false);
+    if (gpio_pin_configure_dt(gpio_output_devices[i], GPIO_OUTPUT_ACTIVE) < 0) {
+      LOG_ERR("Could not configure GPIO output pin %d", i);
+    }
+    if (gpio_pin_set_dt(gpio_output_devices[i], false) < 0) {
+      LOG_ERR("Could not set value to GPIO output pin %d", i);
+    }
   }
 
   for (size_t i{0}; i < GPIO_INPUT_CNT; i++) {
     if (!gpio_is_ready_dt(gpio_input_devices[i])) {
-      printk("GPIO input %d was not ready!\n", i);
+      LOG_ERR("GPIO input %d was not ready!", i);
       return -1;
     }
-    gpio_pin_configure_dt(gpio_input_devices[i], (GPIO_INPUT | GPIO_PULL_UP));
+    if (gpio_pin_configure_dt(gpio_input_devices[i],
+                              (GPIO_INPUT | GPIO_PULL_UP)) < 0) {
+      LOG_ERR("Could not configure GPIO input pin %d", i);
+    }
 
-    gpio_pin_interrupt_configure_dt(gpio_input_devices[i],
-                                    GPIO_INT_EDGE_TO_ACTIVE);
+    if (gpio_pin_interrupt_configure_dt(gpio_input_devices[i],
+                                        GPIO_INT_EDGE_TO_ACTIVE) < 0) {
+      LOG_ERR("Could not configure interrupt for GPIO input pin %d", i);
+    }
 
-    gpio_add_callback(gpio_input_devices[i]->port, switch_callbacks[i]);
+    if (gpio_add_callback(gpio_input_devices[i]->port, switch_callbacks[i])) {
+      LOG_ERR("Could not add a callback for GPIO input pin %d", i);
+    }
 
     gpio_init_callback(switch_callbacks[i], all_isrs[i],
                        BIT(gpio_input_devices[i]->pin));
   }
+  enableMainRelay();
+  enablePrechargeRelay();
 
   return 0;
 }
@@ -151,23 +187,43 @@ int32_t initPeripherals() {
 // ---------------------------------------------------------
 
 void enablePrechargeRelay() {
-  pwm_set_dt(&pre_charge_relay_pwm, PWM_MSEC(40), PWM_MSEC(30));
+  if (pwm_set_dt(&pre_charge_relay_pwm, PWM_PERIOD, PWM_DUTY_PERIOD) < 0) {
+    LOG_ERR("Could not activate the PWM pin!");
+  }
 }
 
 void disablePrechargeRelay() {
-  pwm_set_dt(&pre_charge_relay_pwm, PWM_MSEC(40), 0);
+  if (pwm_set_dt(&pre_charge_relay_pwm, PWM_PERIOD, 0) < 0) {
+    LOG_ERR("Could not de-activate the PWM pin!");
+  }
 }
 
 // ---------------------------------------------------------
 
-void enableMainRelay() { gpio_pin_set_dt(&main_relay, true); }
+void enableMainRelay() {
+  if (gpio_pin_set_dt(&main_relay, true) < 0) {
+    LOG_ERR("Could not activate main relay!");
+  }
+}
 
-void disableMainRelay() { gpio_pin_set_dt(&main_relay, false); }
+void disableMainRelay() {
+  if (gpio_pin_set_dt(&main_relay, false) < 0) {
+    LOG_ERR("Could not de-activate the main relay!");
+  }
+}
 // ---------------------------------------------------------
 
-void enableFaultsLed() { gpio_pin_set_dt(&faults_led, true); }
+void enableFaultsLed() {
+  if (gpio_pin_set_dt(&faults_led, true) < 0) {
+    LOG_ERR("Could not enable the fault LED!");
+  }
+}
 
-void disableFaultsLed() { gpio_pin_set_dt(&faults_led, false); }
+void disableFaultsLed() {
+  if (gpio_pin_set_dt(&faults_led, false) < 0) {
+    LOG_ERR("Could not de-activate the fault LED");
+  }
+}
 
 // ---------------------------------------------------------
 
@@ -176,8 +232,9 @@ static void qdec_cb(struct input_event *evt, void *user_data) {
     pulse_message.speed =
         MAX(MIN(pulse_message.speed + evt->value, MAX_SPEED), 0);
   } else {
-    pulse_message.torque =
-        MAX(MIN(pulse_message.torque + evt->value, MAX_TORQUE), 0);
+    pulse_message.torque = MAX(
+        MIN(pulse_message.torque + (TORQUE_SCALER * evt->value), MAX_TORQUE),
+        0);
   }
 }
 

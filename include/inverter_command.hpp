@@ -1,5 +1,5 @@
-#ifndef __INV_COMMAND_H__
-#define __INV_COMMAND_H__
+#ifndef INVERTER_COMMAND_H
+#define INVERTER_COMMAND_H
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -28,8 +28,8 @@ void Send_Parameter(uint16_t parameter_address, bool rw, int16_t data);
 // ---------------------------------------------------------
 
 void Parse_Parameter_Message(uint8_t *arr, uint16_t *parameter_address,
-                             int16_t *data);
+                             bool *success, int16_t *data);
 
 // ---------------------------------------------------------
 
-#endif // __INV_COMMAND_H__
+#endif // INVERTER_COMMAND_H
