@@ -106,7 +106,10 @@ void speedmode_switch_isr(const struct device *dev, struct gpio_callback *cb,
 
 // ---------------------------------------------------------
 
-void faults_clear_handler(struct k_work *work) { Clear_Faults(); }
+void faults_clear_handler(struct k_work *work) {
+  LOG_INF("Clearing faults!");
+  Clear_Faults();
+}
 
 static K_WORK_DELAYABLE_DEFINE(faults_clear_worker, faults_clear_handler);
 
@@ -119,6 +122,7 @@ void faults_clear_isr(const struct device *dev, struct gpio_callback *cb,
 
 void discharge_switch_handler(struct k_work *work) {
   pulse_message.inverter_discharge ^= 1;
+  // pulse_message.inverter_discharge = 0;
 }
 
 static K_WORK_DELAYABLE_DEFINE(discharge_switch_worker,

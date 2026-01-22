@@ -51,7 +51,7 @@ void CAN_Parse_Thread(void *p1, void *p2, void *p3) {
 
       for (const auto &x : vsm_state_info_table) {
         if (x.val == uint8_t(parsed_internal_state.vsm_state)) {
-          LOG_DBG("VSM State:%s -- Inverter Enable State:%d -- Relay States:%u",
+          LOG_INF("VSM State:%s -- Inverter Enable State:%d -- Relay States:%u",
                   x.str, parsed_internal_state.inverter_enable_state,
                   int32_t(parsed_internal_state.relay_state));
         }
@@ -72,7 +72,7 @@ void CAN_Parse_Thread(void *p1, void *p2, void *p3) {
         for (size_t i = 0; i < err_size; i++) {
           for (const auto &x : possible_faults_table) {
             if (x.mask == uint64_t(possible_faults_buff[i])) {
-              LOG_DBG("Error of type: %s - occured", x.name);
+              LOG_INF("Error of type: %s - occured", x.name);
             }
           }
         }
@@ -94,7 +94,7 @@ void CAN_Parse_Thread(void *p1, void *p2, void *p3) {
           Parse_Voltage_Information(item.data);
 
 #ifdef VOLTAGE_DBG
-      LOG_DBG("Voltage Information: DC BUS Voltage: %d, Output Voltage: %d",
+      LOG_INF("Voltage Information: DC BUS Voltage: %d, Output Voltage: %d",
               voltage_information.dc_bus_voltage,
               voltage_information.output_voltage);
 #endif
@@ -107,7 +107,7 @@ void CAN_Parse_Thread(void *p1, void *p2, void *p3) {
       bool success = false;
       Parse_Parameter_Message(item.data, &parameter_address, &success, &data);
 #ifdef PARAMETER_RECEIVED_DBG
-      LOG_DBG("Response from parameter message: %u %d %d", parameter_address,
+      LOG_INF("Response from parameter message: %u %d %d", parameter_address,
               success, data);
 #endif
 
@@ -138,6 +138,7 @@ void rx_callback_function(const struct device *dev, struct can_frame *frame,
 int32_t CAN_Initialize() {
 
   if (!device_is_ready(can_dev)) {
+    printk("CAN device is not ready!\n");
     LOG_ERR("CAN device is not ready!");
     return -1;
   }

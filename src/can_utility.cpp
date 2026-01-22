@@ -111,7 +111,7 @@ void Pulse_Command() {
   while (true) {
     k_sem_take(&pulse_sem, K_FOREVER);
     LOG_INF("Command Message Values: Torque:%d Speed:%d Inv_Enable:%d "
-            "Inv_Discharge:%d",
+            "Inv_Discharge:%d\n",
             pulse_message.torque, pulse_message.speed,
             pulse_message.inverter_enable, pulse_message.inverter_discharge);
 
