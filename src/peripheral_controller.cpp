@@ -50,10 +50,17 @@ static const gpio_dt_spec faults_clear_sw =
 static const gpio_dt_spec discharge_clear_sw =
     GPIO_DT_SPEC_GET(DT_ALIAS(discharge_sw), gpios);
 
-static const int32_t GPIO_INPUT_CNT = 4;
+static const gpio_dt_spec kill_switch =
+    GPIO_DT_SPEC_GET(DT_ALIAS(kill_switch), gpios);
+
+static const int32_t GPIO_INPUT_CNT = 5;
 static const gpio_dt_spec *gpio_input_devices[GPIO_INPUT_CNT] = {
     &inverter_enable_switch, &speed_mode_switch, &faults_clear_sw,
-    &discharge_clear_sw};
+    &discharge_clear_sw, &kill_switch};
+
+static const int32_t gpio_input_flags[GPIO_INPUT_CNT] = {
+    GPIO_INT_EDGE_TO_ACTIVE, GPIO_INT_EDGE_TO_ACTIVE, GPIO_INT_EDGE_TO_ACTIVE,
+    GPIO_INT_EDGE_TO_ACTIVE, GPIO_INT_EDGE_BOTH};
 
 // ---------------------------------------------------------
 
@@ -61,9 +68,11 @@ gpio_callback inv_switch_cb;
 gpio_callback speedmode_switch_cb;
 gpio_callback faults_clear_cb;
 gpio_callback discharge_cb;
+gpio_callback killswitch_cb;
 
 gpio_callback *switch_callbacks[GPIO_INPUT_CNT] = {
-    &inv_switch_cb, &speedmode_switch_cb, &faults_clear_cb, &discharge_cb};
+    &inv_switch_cb, &speedmode_switch_cb, &faults_clear_cb, &discharge_cb,
+    &killswitch_cb};
 
 // ---------------------------------------------------------
 
@@ -123,10 +132,38 @@ void discharge_switch_isr(const struct device *dev, struct gpio_callback *cb,
 
 // ---------------------------------------------------------
 
+void killswitch_values_refresh() {
+  int32_t ret = gpio_pin_get_dt(&kill_switch);
+
+  if (ret < 0) {
+    LOG_ERR("Could not read value from the kill switch!");
+  } else if (ret == 0) {
+    LOG_INF("Relays off!");
+    disablePrechargeRelay();
+    disableMainRelay();
+  } else {
+    LOG_INF("Relays on!");
+    enablePrechargeRelay();
+    enableMainRelay();
+  }
+}
+
+void killswitch_handler(struct k_work *work) { killswitch_values_refresh(); }
+
+static K_WORK_DELAYABLE_DEFINE(killswitch_worker, killswitch_handler);
+
+void killswitch_isr(const struct device *dev, struct gpio_callback *cb,
+                    uint32_t pins) {
+  k_work_reschedule(&killswitch_worker, K_MSEC(300));
+}
+
+// ---------------------------------------------------------
+
 typedef void (*isr_t)(const struct device *, struct gpio_callback *, uint32_t);
 
 static isr_t all_isrs[] = {inv_switch_isr, speedmode_switch_isr,
-                           faults_clear_isr, discharge_switch_isr};
+                           faults_clear_isr, discharge_switch_isr,
+                           &killswitch_isr};
 
 // ---------------------------------------------------------
 
@@ -167,7 +204,7 @@ int32_t initPeripherals() {
     }
 
     if (gpio_pin_interrupt_configure_dt(gpio_input_devices[i],
-                                        GPIO_INT_EDGE_TO_ACTIVE) < 0) {
+                                        gpio_input_flags[i]) < 0) {
       LOG_ERR("Could not configure interrupt for GPIO input pin %d", i);
     }
 
@@ -178,8 +215,7 @@ int32_t initPeripherals() {
     gpio_init_callback(switch_callbacks[i], all_isrs[i],
                        BIT(gpio_input_devices[i]->pin));
   }
-  enableMainRelay();
-  enablePrechargeRelay();
+  killswitch_values_refresh();
 
   return 0;
 }
