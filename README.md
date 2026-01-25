@@ -49,7 +49,7 @@ The next planned milestone is:
 - **Calibration of the EMRAX 268 electric motor**(success)
 - **Initial motor spin test**(success)
 
-https://github.com/user-attachments/assets/dd11458a-0c64-41e6-816b-9e89eb254d2d.mp4
+https://github.com/user-attachments/assets/87529e9d-0019-4f9b-9779-2c83ee9275ea.mp4
 
 ## Getting started 
 - Clone the repository
