@@ -48,9 +48,8 @@ The codebase is **under active development**.
 The next planned milestone is:
 - **Calibration of the EMRAX 268 electric motor**(success)
 - **Initial motor spin test**(success)
-
-Video of the test:
-
+- 
+!(Video of the test)[https://drive.google.com/file/d/1JdEKr2Tl9ZLnUU5_6DwbyOzA3YaV_2Uz/view?usp=drive_link]
 
 ## Getting started 
 - Clone the repository
