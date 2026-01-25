@@ -2,7 +2,7 @@
 
 This repository contains the firmware for the **Electronic Control Unit (ECU)** developed by the **Nova Electric Racing Student Team**  
 
-URL to team website: https://novaracing.nl
+Team Website: https://novaracing.nl
 
 ## Scope
 
